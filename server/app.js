@@ -1,13 +1,13 @@
 const express = require('express');
 const { exec, spawn } = require('child_process');
 const cors = require('cors');
-const threadStorage = require('./threadStorage');
+const sessionStorage = require('./sessionStorage');
 
 const app = express();
 
-// Initialize thread storage on startup
-threadStorage.initialize().catch(err => {
-  console.error('Failed to initialize thread storage:', err);
+// Initialize session storage on startup
+sessionStorage.initialize().catch(err => {
+  console.error('Failed to initialize session storage:', err);
 });
 
 // Middleware
@@ -286,71 +286,71 @@ app.post('/api/execute-custom', (req, res) => {
   }
 });
 
-// Get threads from file storage
+// Get sessions from file storage
 app.get('/api/threads', async (req, res) => {
   try {
-    const threads = await threadStorage.getAllThreads();
-    res.json({ threads });
+    const sessions = await sessionStorage.getAllSessions();
+    res.json({ threads: sessions });
   } catch (error) {
-    console.error('Error fetching threads:', error);
-    res.status(500).json({ error: 'Failed to fetch threads' });
+    console.error('Error fetching sessions:', error);
+    res.status(500).json({ error: 'Failed to fetch sessions' });
   }
 });
 
-// Get thread details
+// Get session details
 app.get('/api/threads/:id', async (req, res) => {
   try {
-    const threadId = parseInt(req.params.id);
-    const thread = await threadStorage.getThreadById(threadId);
+    const sessionId = parseInt(req.params.id);
+    const session = await sessionStorage.getSessionById(sessionId);
 
-    if (!thread) {
-      return res.status(404).json({ error: 'Thread not found' });
+    if (!session) {
+      return res.status(404).json({ error: 'Session not found' });
     }
 
-    res.json(thread);
+    res.json(session);
   } catch (error) {
-    console.error('Error fetching thread details:', error);
-    res.status(500).json({ error: 'Failed to fetch thread details' });
+    console.error('Error fetching session details:', error);
+    res.status(500).json({ error: 'Failed to fetch session details' });
   }
 });
 
-// Save or create a thread
+// Save or create a session
 app.post('/api/threads', async (req, res) => {
   try {
-    const thread = req.body;
+    const session = req.body;
 
-    if (!thread.id || !thread.title) {
-      return res.status(400).json({ error: 'Thread must have id and title' });
-    }
-
-    // Ensure thread has required fields
-    if (!thread.timestamp) {
-      thread.timestamp = new Date().toISOString();
-    }
-    if (!thread.messages) {
-      thread.messages = [];
-    }
-    if (!thread.preview) {
-      thread.preview = 'New thread - no messages yet';
+    if (!session.id || !session.title) {
+      return res.status(400).json({ error: 'Session must have id and title' });
     }
 
-    const success = await threadStorage.saveThread(thread);
+    // Ensure session has required fields
+    if (!session.timestamp) {
+      session.timestamp = new Date().toISOString();
+    }
+    if (!session.messages) {
+      session.messages = [];
+    }
+    if (!session.preview) {
+      session.preview = 'New session - no messages yet';
+    }
+
+    const success = await sessionStorage.saveSession(session);
 
     if (success) {
-      res.json({ success: true, thread });
+      res.json({ success: true, thread: session });
     } else {
-      res.status(500).json({ error: 'Failed to save thread' });
+      res.status(500).json({ error: 'Failed to save session' });
     }
   } catch (error) {
-    console.error('Error saving thread:', error);
-    res.status(500).json({ error: 'Failed to save thread' });
+    console.error('Error saving session:', error);
+    res.status(500).json({ error: 'Failed to save session' });
   }
 });
 
-// Add a message to a thread
+// Add a message to a session
 app.post('/api/threads/:id/messages', async (req, res) => {
   try {
-    const threadId = parseInt(req.params.id);
+    const sessionId = parseInt(req.params.id);
     const message = req.body;
 
     if (!message.role || !message.content) {
@@ -362,12 +362,12 @@ app.post('/api/threads/:id/messages', async (req, res) => {
       message.timestamp = new Date().toISOString();
     }
 
-    const success = await threadStorage.addMessageToThread(threadId, message);
+    const success = await sessionStorage.addMessageToSession(sessionId, message);
 
     if (success) {
       res.json({ success: true, message });
     } else {
-      res.status(500).json({ error: 'Failed to add message to thread' });
+      res.status(500).json({ error: 'Failed to add message to session' });
     }
   } catch (error) {
     console.error('Error adding message:', error);
@@ -375,25 +375,25 @@ app.post('/api/threads/:id/messages', async (req, res) => {
   }
 });
 
-// Delete a thread
+// Delete a session
 app.delete('/api/threads/:id', async (req, res) => {
   try {
-    const threadId = parseInt(req.params.id);
+    const sessionId = parseInt(req.params.id);
 
-    if (isNaN(threadId)) {
-      return res.status(400).json({ error: 'Invalid thread ID' });
+    if (isNaN(sessionId)) {
+      return res.status(400).json({ error: 'Invalid session ID' });
     }
 
-    const success = await threadStorage.deleteThread(threadId);
+    const success = await sessionStorage.deleteSession(sessionId);
 
     if (success) {
-      res.json({ success: true, message: 'Thread deleted successfully' });
+      res.json({ success: true, message: 'Session deleted successfully' });
     } else {
-      res.status(404).json({ error: 'Thread not found' });
+      res.status(404).json({ error: 'Session not found' });
     }
   } catch (error) {
-    console.error('Error deleting thread:', error);
-    res.status(500).json({ error: 'Failed to delete thread' });
+    console.error('Error deleting session:', error);
+    res.status(500).json({ error: 'Failed to delete session' });
   }
 });
 

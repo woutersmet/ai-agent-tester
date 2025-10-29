@@ -3,10 +3,10 @@ const path = require('path');
 
 // Use environment variable for user data path, fallback to current directory for development
 const USER_DATA_PATH = process.env.USER_DATA_PATH || path.join(__dirname, '..');
-const THREADS_DIR = path.join(USER_DATA_PATH, 'ai-agent-runner-sessions-history');
+const SESSIONS_DIR = path.join(USER_DATA_PATH, 'ai-agent-runner-sessions-history');
 
-// Starter thread data (same as current hardcoded data)
-const STARTER_THREADS = [
+// Starter session data (same as current hardcoded data)
+const STARTER_SESSIONS = [
   {
     id: 1,
     title: 'Test Command Execution',
@@ -97,33 +97,33 @@ async function initialize() {
   try {
     // Check if directory exists
     try {
-      await fs.access(THREADS_DIR);
+      await fs.access(SESSIONS_DIR);
       console.log('✅ ai-agent-runner-sessions-history folder already exists');
       return;
     } catch (error) {
       // Directory doesn't exist, create it
       console.log('📁 Creating ai-agent-runner-sessions-history folder...');
-      await fs.mkdir(THREADS_DIR, { recursive: true });
+      await fs.mkdir(SESSIONS_DIR, { recursive: true });
     }
 
-    // Create starter files with threads grouped by date
-    const threadsByDate = {};
+    // Create starter files with sessions grouped by date
+    const sessionsByDate = {};
     
-    for (const thread of STARTER_THREADS) {
-      const date = new Date(thread.timestamp);
+    for (const session of STARTER_SESSIONS) {
+      const date = new Date(session.timestamp);
       const filename = getFilenameForDate(date);
       
-      if (!threadsByDate[filename]) {
-        threadsByDate[filename] = [];
+      if (!sessionsByDate[filename]) {
+        sessionsByDate[filename] = [];
       }
-      threadsByDate[filename].push(thread);
+      sessionsByDate[filename].push(session);
     }
 
-    // Write each date's threads to a file
-    for (const [filename, threads] of Object.entries(threadsByDate)) {
-      const filepath = path.join(THREADS_DIR, filename);
-      await fs.writeFile(filepath, JSON.stringify(threads, null, 2));
-      console.log(`✅ Created starter file: ${filename} with ${threads.length} thread(s)`);
+    // Write each date's sessions to a file
+    for (const [filename, sessions] of Object.entries(sessionsByDate)) {
+      const filepath = path.join(SESSIONS_DIR, filename);
+      await fs.writeFile(filepath, JSON.stringify(sessions, null, 2));
+      console.log(`✅ Created starter file: ${filename} with ${sessions.length} session(s)`);
     }
 
     console.log('✅ ai-agent-runner-sessions-history initialized with starter data');
@@ -134,232 +134,247 @@ async function initialize() {
 }
 
 /**
- * Get all threads from all date files
- * @returns {Promise<Array>} - Array of thread summaries (without messages)
+ * Get all sessions from all date files
+ * @returns {Promise<Array>} - Array of session summaries (without messages)
  */
-async function getAllThreads() {
+async function getAllSessions() {
   try {
-    await fs.access(THREADS_DIR);
+    await fs.access(SESSIONS_DIR);
   } catch (error) {
     // If directory doesn't exist, initialize it
     await initialize();
   }
 
   try {
-    const files = await fs.readdir(THREADS_DIR);
+    const files = await fs.readdir(SESSIONS_DIR);
     const jsonFiles = files.filter(f => f.endsWith('.json')).sort().reverse(); // Most recent first
     
-    const allThreads = [];
+    const allSessions = [];
     
     for (const file of jsonFiles) {
-      const filepath = path.join(THREADS_DIR, file);
+      const filepath = path.join(SESSIONS_DIR, file);
       const content = await fs.readFile(filepath, 'utf-8');
-      const threads = JSON.parse(content);
+      const sessions = JSON.parse(content);
       
-      // Add thread summaries (without full messages)
-      for (const thread of threads) {
-        allThreads.push({
-          id: thread.id,
-          title: thread.title,
-          preview: thread.preview,
-          timestamp: thread.timestamp,
-          unread: thread.unread || false
+      // Add session summaries (without full messages)
+      for (const session of sessions) {
+        allSessions.push({
+          id: session.id,
+          title: session.title,
+          preview: session.preview,
+          timestamp: session.timestamp,
+          unread: session.unread || false
         });
       }
     }
     
-    return allThreads;
+    return allSessions;
   } catch (error) {
-    console.error('Error reading threads:', error);
+    console.error('Error reading sessions:', error);
     return [];
   }
 }
 
 /**
- * Get a specific thread by ID
- * @param {number} threadId - The thread ID to find
- * @returns {Promise<Object|null>} - Thread object with messages or null if not found
+ * Get a specific session by ID
+ * @param {number} sessionId - The session ID to find
+ * @returns {Promise<Object|null>} - Session object with messages or null if not found
  */
-async function getThreadById(threadId) {
+async function getSessionById(sessionId) {
   try {
-    await fs.access(THREADS_DIR);
+    await fs.access(SESSIONS_DIR);
   } catch (error) {
     await initialize();
   }
 
   try {
-    const files = await fs.readdir(THREADS_DIR);
+    const files = await fs.readdir(SESSIONS_DIR);
     const jsonFiles = files.filter(f => f.endsWith('.json'));
     
     for (const file of jsonFiles) {
-      const filepath = path.join(THREADS_DIR, file);
+      const filepath = path.join(SESSIONS_DIR, file);
       const content = await fs.readFile(filepath, 'utf-8');
-      const threads = JSON.parse(content);
+      const sessions = JSON.parse(content);
       
-      const thread = threads.find(t => t.id === threadId);
-      if (thread) {
-        return thread;
+      const session = sessions.find(s => s.id === sessionId);
+      if (session) {
+        return session;
       }
     }
     
     return null;
   } catch (error) {
-    console.error('Error reading thread:', error);
+    console.error('Error reading session:', error);
     return null;
   }
 }
 
 /**
- * Save or update a thread
- * @param {Object} thread - Thread object to save
+ * Save or update a session
+ * @param {Object} session - Session object to save
  * @returns {Promise<boolean>} - Success status
  */
-async function saveThread(thread) {
+async function saveSession(session) {
   try {
-    await fs.access(THREADS_DIR);
+    await fs.access(SESSIONS_DIR);
   } catch (error) {
     await initialize();
   }
 
   try {
-    const date = new Date(thread.timestamp);
+    const date = new Date(session.timestamp);
     const filename = getFilenameForDate(date);
-    const filepath = path.join(THREADS_DIR, filename);
-    
-    let threads = [];
-    
-    // Read existing threads for this date
+    const filepath = path.join(SESSIONS_DIR, filename);
+
+    let sessions = [];
+
+    // Read existing sessions for this date
     try {
       const content = await fs.readFile(filepath, 'utf-8');
-      threads = JSON.parse(content);
+      sessions = JSON.parse(content);
+      console.log(`📖 Read ${sessions.length} existing sessions from ${filename}`);
     } catch (error) {
       // File doesn't exist yet, that's okay
+      console.log(`📄 Creating new file ${filename}`);
     }
-    
-    // Find and update or add thread
-    const index = threads.findIndex(t => t.id === thread.id);
+
+    // Find and update or add session
+    const index = sessions.findIndex(s => s.id === session.id);
     if (index >= 0) {
-      threads[index] = thread;
+      console.log(`🔄 Updating existing session ${session.id} in ${filename}`);
+      sessions[index] = session;
     } else {
-      threads.push(thread);
+      console.log(`➕ Adding new session ${session.id} to ${filename}`);
+      sessions.push(session);
     }
-    
+
     // Write back to file
-    await fs.writeFile(filepath, JSON.stringify(threads, null, 2));
-    console.log(`✅ Saved thread ${thread.id} to ${filename}`);
+    await fs.writeFile(filepath, JSON.stringify(sessions, null, 2));
+    console.log(`✅ Saved session ${session.id} to ${filename} (file now has ${sessions.length} sessions)`);
     return true;
   } catch (error) {
-    console.error('Error saving thread:', error);
+    console.error('❌ Error saving session:', error);
     return false;
   }
 }
 
 /**
- * Add a message to a thread
- * @param {number} threadId - Thread ID
+ * Add a message to a session
+ * @param {number} sessionId - Session ID
  * @param {Object} message - Message object with role, content, timestamp
  * @returns {Promise<boolean>} - Success status
  */
-async function addMessageToThread(threadId, message) {
+async function addMessageToSession(sessionId, message) {
   try {
-    // Find the thread and the file it's in
-    const files = await fs.readdir(THREADS_DIR);
+    // Ensure directory exists
+    try {
+      await fs.access(SESSIONS_DIR);
+    } catch (error) {
+      await initialize();
+    }
+
+    // Find the session and the file it's in
+    const files = await fs.readdir(SESSIONS_DIR);
     const jsonFiles = files.filter(f => f.endsWith('.json'));
 
-    for (const file of jsonFiles) {
-      const filepath = path.join(THREADS_DIR, file);
-      const content = await fs.readFile(filepath, 'utf-8');
-      const threads = JSON.parse(content);
+    console.log(`🔍 Searching for session ${sessionId} in ${jsonFiles.length} files`);
 
-      const threadIndex = threads.findIndex(t => t.id === threadId);
-      if (threadIndex >= 0) {
-        const thread = threads[threadIndex];
+    for (const file of jsonFiles) {
+      const filepath = path.join(SESSIONS_DIR, file);
+      const content = await fs.readFile(filepath, 'utf-8');
+      const sessions = JSON.parse(content);
+
+      const sessionIndex = sessions.findIndex(s => s.id === sessionId);
+      if (sessionIndex >= 0) {
+        const session = sessions[sessionIndex];
 
         // Add message
-        if (!thread.messages) {
-          thread.messages = [];
+        if (!session.messages) {
+          session.messages = [];
         }
-        thread.messages.push(message);
+        session.messages.push(message);
 
         // Update preview with latest message
-        thread.preview = message.content.substring(0, 100) + (message.content.length > 100 ? '...' : '');
+        session.preview = message.content.substring(0, 100) + (message.content.length > 100 ? '...' : '');
 
         // Update timestamp but keep in same file
-        thread.timestamp = message.timestamp;
+        session.timestamp = message.timestamp;
 
-        // Update the thread in the array
-        threads[threadIndex] = thread;
+        // Update the session in the array
+        sessions[sessionIndex] = session;
 
         // Write back to the SAME file
-        await fs.writeFile(filepath, JSON.stringify(threads, null, 2));
-        console.log(`✅ Added message to thread ${threadId} in ${file}`);
+        await fs.writeFile(filepath, JSON.stringify(sessions, null, 2));
+        console.log(`✅ Added message to session ${sessionId} in ${file} (now has ${session.messages.length} messages)`);
         return true;
       }
     }
 
-    console.error(`Thread ${threadId} not found`);
+    console.error(`❌ Session ${sessionId} not found in any of the ${jsonFiles.length} files`);
+    console.error(`   Files searched: ${jsonFiles.join(', ')}`);
     return false;
   } catch (error) {
-    console.error('Error adding message to thread:', error);
+    console.error('❌ Error adding message to session:', error);
     return false;
   }
 }
 
 /**
- * Delete a thread by ID
- * @param {number} threadId - Thread ID to delete
+ * Delete a session by ID
+ * @param {number} sessionId - Session ID to delete
  * @returns {Promise<boolean>} - Success status
  */
-async function deleteThread(threadId) {
+async function deleteSession(sessionId) {
   try {
-    await fs.access(THREADS_DIR);
+    await fs.access(SESSIONS_DIR);
   } catch (error) {
     await initialize();
   }
 
   try {
-    const files = await fs.readdir(THREADS_DIR);
+    const files = await fs.readdir(SESSIONS_DIR);
     const jsonFiles = files.filter(f => f.endsWith('.json'));
 
     for (const file of jsonFiles) {
-      const filepath = path.join(THREADS_DIR, file);
+      const filepath = path.join(SESSIONS_DIR, file);
       const content = await fs.readFile(filepath, 'utf-8');
-      const threads = JSON.parse(content);
+      const sessions = JSON.parse(content);
 
-      const threadIndex = threads.findIndex(t => t.id === threadId);
-      if (threadIndex >= 0) {
-        // Remove the thread from the array
-        threads.splice(threadIndex, 1);
+      const sessionIndex = sessions.findIndex(s => s.id === sessionId);
+      if (sessionIndex >= 0) {
+        // Remove the session from the array
+        sessions.splice(sessionIndex, 1);
 
         // If the file is now empty, delete it
-        if (threads.length === 0) {
+        if (sessions.length === 0) {
           await fs.unlink(filepath);
           console.log(`✅ Deleted empty file: ${file}`);
         } else {
-          // Otherwise, write the updated threads back to the file
-          await fs.writeFile(filepath, JSON.stringify(threads, null, 2));
-          console.log(`✅ Deleted thread ${threadId} from ${file}`);
+          // Otherwise, write the updated sessions back to the file
+          await fs.writeFile(filepath, JSON.stringify(sessions, null, 2));
+          console.log(`✅ Deleted session ${sessionId} from ${file}`);
         }
 
         return true;
       }
     }
 
-    console.error(`Thread ${threadId} not found`);
+    console.error(`Session ${sessionId} not found`);
     return false;
   } catch (error) {
-    console.error('Error deleting thread:', error);
+    console.error('Error deleting session:', error);
     return false;
   }
 }
 
 module.exports = {
   initialize,
-  getAllThreads,
-  getThreadById,
-  saveThread,
-  addMessageToThread,
-  deleteThread,
-  THREADS_DIR
+  getAllSessions,
+  getSessionById,
+  saveSession,
+  addMessageToSession,
+  deleteSession,
+  SESSIONS_DIR
 };
+
 

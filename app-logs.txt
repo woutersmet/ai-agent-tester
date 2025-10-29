@@ -1,0 +1,23 @@
+
+> ai-agent-tester-app-mac@1.0.0 start
+> electron .
+
+✅ ai-agent-runner-sessions-history folder already exists
+🚀 Starting AI Agent Tester (Dev) in DEVELOPMENT mode
+📁 User data path: /Users/wouter.smet/Library/Application Support/AI Agent Tester (Dev)
+❌ Port 3000 is already in use
+Failed to start server: Error: listen EADDRINUSE: address already in use :::3000
+    at Server.setupListenHandle [as _listen2] (node:net:1817:16)
+    at listenInCluster (node:net:1865:12)
+    at Server.listen (node:net:1953:7)
+    at Function.listen (/Users/wouter.smet/Projects/ai-agent-tester/node_modules/express/lib/application.js:635:24)
+    at /Users/wouter.smet/Projects/ai-agent-tester/main.js:66:25
+    at new Promise (<anonymous>)
+    at startExpressServer (/Users/wouter.smet/Projects/ai-agent-tester/main.js:65:10)
+    at /Users/wouter.smet/Projects/ai-agent-tester/main.js:166:11 {
+  code: 'EADDRINUSE',
+  errno: -48,
+  syscall: 'listen',
+  address: '::',
+  port: 3000
+}

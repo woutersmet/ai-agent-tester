@@ -392,7 +392,11 @@ async function executeCommand() {
     messagesContainer.insertAdjacentHTML('beforeend', userMessageHtml);
 
     // Save user message to backend
-    await saveMessage(currentSessionId, userMessageObj);
+    const userMessageSaved = await saveMessage(currentSessionId, userMessageObj);
+    if (!userMessageSaved) {
+      console.error('Failed to save user message to backend');
+      // Continue anyway - message is shown in UI
+    }
 
     // Add "thinking..." message
     const thinkingMessageHtml = `
@@ -477,7 +481,10 @@ async function executeCommand() {
       }
 
       // Re-save the user message with the command
-      await saveMessage(currentSessionId, userMessageObj);
+      const commandSaved = await saveMessage(currentSessionId, userMessageObj);
+      if (!commandSaved) {
+        console.error('Failed to update user message with command');
+      }
     }
 
     // Check if cancelled before proceeding
@@ -529,7 +536,12 @@ async function executeCommand() {
     messagesContainer.insertAdjacentHTML('beforeend', systemMessageHtml);
 
     // Save system message to backend
-    await saveMessage(currentSessionId, systemMessageObj);
+    const systemMessageSaved = await saveMessage(currentSessionId, systemMessageObj);
+    if (!systemMessageSaved) {
+      console.error('Failed to save system message to backend');
+      // Show warning to user
+      updateStatus('Warning: Message not saved to history');
+    }
 
     // Scroll to bottom
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
@@ -571,7 +583,10 @@ async function executeCommand() {
       messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
       // Save error message to backend
-      await saveMessage(currentSessionId, errorMessageObj);
+      const errorMessageSaved = await saveMessage(currentSessionId, errorMessageObj);
+      if (!errorMessageSaved) {
+        console.error('Failed to save error message to backend');
+      }
 
       updateStatus('Error executing command');
     }
@@ -680,7 +695,14 @@ async function createNewSession() {
   };
 
   // Save session to backend
-  await saveSession(newSession);
+  const saved = await saveSession(newSession);
+
+  if (!saved) {
+    console.error('Failed to save new session to backend');
+    updateStatus('Error: Failed to create session');
+    alert('Failed to create new session. Please try again.');
+    return;
+  }
 
   // Add to sessions array at the beginning
   sessions.unshift(newSession);

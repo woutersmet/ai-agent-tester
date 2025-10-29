@@ -216,6 +216,27 @@ function updateQuickActions(commandId) {
   }
 }
 
+// Load saved API request values from localStorage
+function loadApiRequestValues() {
+  const savedUrl = localStorage.getItem('apiRequestUrl');
+  const savedToken = localStorage.getItem('apiRequestToken');
+  const savedBody = localStorage.getItem('apiRequestBody');
+  const savedMethod = localStorage.getItem('apiRequestMethod');
+
+  if (savedUrl) apiUrlInput.value = savedUrl;
+  if (savedToken) apiTokenInput.value = savedToken;
+  if (savedBody) apiBodyInput.value = savedBody;
+  if (savedMethod) apiMethodSelect.value = savedMethod;
+}
+
+// Save API request values to localStorage
+function saveApiRequestValues() {
+  localStorage.setItem('apiRequestUrl', apiUrlInput.value.trim());
+  localStorage.setItem('apiRequestToken', apiTokenInput.value.trim());
+  localStorage.setItem('apiRequestBody', apiBodyInput.value.trim());
+  localStorage.setItem('apiRequestMethod', apiMethodSelect.value);
+}
+
 // Update input mode based on selected command
 function updateInputMode(commandId) {
   const command = availableCommands.find(cmd => cmd.id === commandId);
@@ -236,6 +257,10 @@ function updateInputMode(commandId) {
     inputWrapper.classList.add('hidden');
     inputWrapperApi.classList.remove('hidden');
     inputWrapperDisabled.classList.add('hidden');
+
+    // Load saved values
+    loadApiRequestValues();
+
     // Hide body input by default (GET is default)
     if (apiMethodSelect.value === 'POST') {
       apiBodyInput.classList.remove('hidden');
@@ -327,10 +352,32 @@ function renderMessages(messages) {
       `;
     }
 
+    // Process system messages for curl responses and JSON
+    let contentHtml = '';
+    if (msg.role === 'system' && msg.content) {
+      const processed = processCurlResponse(msg.content);
+
+      if (processed.hasJson) {
+        // Show processed output (status line + body) and formatted JSON separately
+        contentHtml = `
+          <div class="message-content">${escapeHtml(processed.processed)}</div>
+          <div class="message-json-container">
+            <div class="message-json-header">Formatted JSON Response:</div>
+            <pre class="message-json">${escapeHtml(processed.jsonFormatted)}</pre>
+          </div>
+        `;
+      } else {
+        // Just show the processed output
+        contentHtml = `<div class="message-content">${escapeHtml(processed.processed)}</div>`;
+      }
+    } else {
+      contentHtml = `<div class="message-content">${escapeHtml(msg.content)}</div>`;
+    }
+
     return `
       <div class="message ${msg.role}">
         <div class="message-role">${msg.role}</div>
-        <div class="message-content">${escapeHtml(msg.content)}</div>
+        ${contentHtml}
         ${commandHtml}
         <div class="message-time">${formatTime(msg.timestamp)}</div>
       </div>
@@ -419,6 +466,9 @@ async function executeCommand() {
     let rawCommand = '';
 
     if (cmdConfig && cmdConfig.isApiRequest) {
+      // Save API request values to localStorage
+      saveApiRequestValues();
+
       content = `${apiMethod} ${apiUrl}`;
       // Build curl command with optional token and body
       rawCommand = `curl -X ${apiMethod}`;
@@ -516,11 +566,12 @@ async function executeCommand() {
     messagesContainer.insertAdjacentHTML('beforeend', thinkingMessageHtml);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
-    // Clear inputs immediately
+    // Clear inputs immediately (but keep API request values for reuse)
     messageInput.value = '';
-    apiUrlInput.value = '';
-    apiTokenInput.value = '';
-    apiBodyInput.value = '';
+    // Don't clear API request values - they are remembered in localStorage
+    // apiUrlInput.value = '';
+    // apiTokenInput.value = '';
+    // apiBodyInput.value = '';
 
     // Store abort controller and process ID for cancellation
     window.currentAbortController = abortController;
@@ -605,10 +656,28 @@ async function executeCommand() {
       timestamp: systemMessageTimestamp
     };
 
+    // Process the output for curl responses and JSON
+    const processed = processCurlResponse(outputContent);
+
+    let contentHtml = '';
+    if (processed.hasJson) {
+      // Show processed output (status line + body) and formatted JSON separately
+      contentHtml = `
+        <div class="message-content">${escapeHtml(processed.processed)}</div>
+        <div class="message-json-container">
+          <div class="message-json-header">Formatted JSON Response:</div>
+          <pre class="message-json">${escapeHtml(processed.jsonFormatted)}</pre>
+        </div>
+      `;
+    } else {
+      // Just show the processed output
+      contentHtml = `<div class="message-content">${escapeHtml(processed.processed)}</div>`;
+    }
+
     const systemMessageHtml = `
       <div class="message system">
         <div class="message-role">system</div>
-        <div class="message-content">${escapeHtml(outputContent)}</div>
+        ${contentHtml}
         <div class="message-time">${formatTime(systemMessageTimestamp)}</div>
       </div>
     `;
@@ -1063,6 +1132,63 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
+// Process curl response: strip headers and format JSON
+function processCurlResponse(output) {
+  // Check if this looks like a curl response with -i flag (includes headers)
+  const lines = output.split('\n');
+
+  // Find the first line (HTTP status line)
+  let statusLine = '';
+  let bodyStartIndex = 0;
+  let foundBlankLine = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+
+    // First non-empty line is the status line
+    if (!statusLine && line && line.startsWith('HTTP/')) {
+      statusLine = lines[i];
+      continue;
+    }
+
+    // Find the blank line that separates headers from body
+    if (statusLine && !foundBlankLine) {
+      if (line === '') {
+        foundBlankLine = true;
+        bodyStartIndex = i + 1;
+        break;
+      }
+    }
+  }
+
+  // If we found headers, extract just the status line and body
+  let processedOutput = output;
+  if (statusLine && foundBlankLine) {
+    const bodyLines = lines.slice(bodyStartIndex);
+    const body = bodyLines.join('\n').trim();
+    processedOutput = statusLine + '\n\n' + body;
+  }
+
+  // Try to detect and extract JSON from the body
+  const bodyText = foundBlankLine ? lines.slice(bodyStartIndex).join('\n').trim() : processedOutput;
+  let jsonData = null;
+  let jsonFormatted = null;
+
+  try {
+    // Try to parse as JSON
+    jsonData = JSON.parse(bodyText);
+    jsonFormatted = JSON.stringify(jsonData, null, 2);
+  } catch (e) {
+    // Not valid JSON, that's okay
+  }
+
+  return {
+    processed: processedOutput,
+    hasJson: jsonData !== null,
+    jsonFormatted: jsonFormatted
+  };
+}
+
 // Load theme preference from localStorage
 function loadThemePreference() {
   const savedTheme = localStorage.getItem('theme') || 'light';
@@ -1111,9 +1237,10 @@ function setupEventListeners() {
 
   clearBtn.addEventListener('click', () => {
     messageInput.value = '';
-    apiUrlInput.value = '';
-    apiTokenInput.value = '';
-    apiBodyInput.value = '';
+    // Don't clear API request values - they are remembered
+    // apiUrlInput.value = '';
+    // apiTokenInput.value = '';
+    // apiBodyInput.value = '';
     commandSelect.value = '';
     updateInputMode('');
     updateStatus('Cleared input');

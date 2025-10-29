@@ -231,6 +231,8 @@ const PORT = 3000; // Change to another port like 3001
 
 This project includes a sample **Model Context Protocol (MCP)** server that provides access to famous quotes. This is a great example of how to create a simple MCP server in a single Node.js file.
 
+The MCP server is located in `mcp-servers/famous-quotes/` with its own `package.json` and dependencies, keeping it isolated from the main Electron app.
+
 ### What is MCP?
 
 Model Context Protocol (MCP) is a standard protocol that allows AI assistants (like Claude, Gemini, etc.) to interact with external tools and data sources. The MCP server exposes tools that the AI can call to retrieve information.
@@ -246,12 +248,13 @@ The Famous Quotes MCP server provides four tools:
 
 ### Running the MCP Server
 
-#### Prerequisites
+#### Installation
 
-First, install the MCP SDK:
+First, navigate to the MCP server directory and install dependencies:
 
 ```bash
-npm install @modelcontextprotocol/sdk
+cd mcp-servers/famous-quotes
+npm install
 ```
 
 #### Running Standalone
@@ -259,7 +262,15 @@ npm install @modelcontextprotocol/sdk
 You can test the server directly:
 
 ```bash
-node famous-quotes-mcp-server.js
+cd mcp-servers/famous-quotes
+npm start
+```
+
+Or run the test suite:
+
+```bash
+cd mcp-servers/famous-quotes
+npm test
 ```
 
 The server communicates via stdio (standard input/output), so it will wait for JSON-RPC messages. You'll see console logs when tools are called.
@@ -288,7 +299,7 @@ Edit `mcp_settings.json` and add the Famous Quotes server:
     "famous-quotes": {
       "command": "node",
       "args": [
-        "/Users/wouter.smet/Projects/ai-agent-tester/famous-quotes-mcp-server.js"
+        "/Users/wouter.smet/Projects/ai-agent-tester/mcp-servers/famous-quotes/famous-quotes-mcp-server.js"
       ],
       "env": {}
     }

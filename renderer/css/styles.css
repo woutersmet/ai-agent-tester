@@ -894,6 +894,22 @@ body {
   margin-bottom: 20px;
 }
 
+.section-description {
+  font-size: 13px;
+  color: #6e6e73;
+  margin-bottom: 16px;
+  margin-top: -12px;
+}
+
+.section-description code {
+  background-color: #f5f5f7;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  font-size: 12px;
+  color: #1d1d1f;
+}
+
 .setting-item {
   margin-bottom: 16px;
 }
@@ -1217,6 +1233,11 @@ body.dark-theme .nav-item.active {
   background-color: #007aff;
 }
 
+body.dark-theme .sidebar {
+  background-color: #252525;
+  border-right-color: #3c3c43;
+}
+
 body.dark-theme .threads-sidebar {
   background-color: #252525;
   border-right-color: #3c3c43;
@@ -1244,6 +1265,10 @@ body.dark-theme .thread-item:hover {
 body.dark-theme .thread-item.active {
   background-color: #007aff;
   border-color: #007aff;
+}
+
+body.dark-theme .thread-item-title {
+  color: #e5e5e7;
 }
 
 body.dark-theme .thread-title {
@@ -1322,6 +1347,15 @@ body.dark-theme .help-section {
 }
 
 body.dark-theme .section-title {
+  color: #e5e5e7;
+}
+
+body.dark-theme .section-description {
+  color: #86868b;
+}
+
+body.dark-theme .section-description code {
+  background-color: #2d2d2d;
   color: #e5e5e7;
 }
 
@@ -1414,5 +1448,133 @@ body.dark-theme ::-webkit-scrollbar-thumb {
 
 body.dark-theme ::-webkit-scrollbar-thumb:hover {
   background: #4c4c4f;
+}
+
+/* Dark theme for search box and new thread button */
+body.dark-theme .search-box {
+  background-color: #252525;
+  border-bottom-color: #3c3c43;
+}
+
+body.dark-theme .search-box input {
+  background-color: #2d2d2d;
+  border-color: #3c3c43;
+  color: #e5e5e7;
+}
+
+body.dark-theme .search-box input::placeholder {
+  color: #86868b;
+}
+
+body.dark-theme .search-box input:focus {
+  border-color: #007aff;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+}
+
+body.dark-theme .new-thread-container {
+  background-color: #252525;
+  border-bottom-color: #3c3c43;
+}
+
+body.dark-theme .new-thread-btn {
+  background: linear-gradient(180deg, #3c3c43 0%, #2d2d2d 100%);
+  color: #e5e5e7;
+  border-color: #4c4c4f;
+}
+
+body.dark-theme .new-thread-btn:hover {
+  background: linear-gradient(180deg, #4c4c4f 0%, #3c3c43 100%);
+  border-color: #5c5c5f;
+}
+
+body.dark-theme .new-thread-btn:active {
+  background: linear-gradient(180deg, #2d2d2d 0%, #252525 100%);
+}
+
+/* Dark theme for toolbar buttons and command select */
+body.dark-theme .toolbar-btn {
+  background-color: #2d2d2d;
+  border-color: #3c3c43;
+  color: #e5e5e7;
+}
+
+body.dark-theme .toolbar-btn:hover {
+  background-color: #3c3c43;
+  border-color: #007aff;
+}
+
+body.dark-theme .command-select {
+  background-color: #2d2d2d;
+  border-color: #3c3c43;
+  color: #e5e5e7;
+}
+
+body.dark-theme .command-select:focus {
+  border-color: #007aff;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+}
+
+body.dark-theme .command-select option {
+  background-color: #2d2d2d;
+  color: #e5e5e7;
+}
+
+/* Dark theme for API inputs */
+body.dark-theme .api-method-select,
+body.dark-theme .api-url-input,
+body.dark-theme .api-token-input {
+  background-color: #2d2d2d;
+  border-color: #3c3c43;
+  color: #e5e5e7;
+}
+
+body.dark-theme .api-method-select:focus,
+body.dark-theme .api-url-input:focus,
+body.dark-theme .api-token-input:focus {
+  border-color: #007aff;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+}
+
+body.dark-theme .api-method-select option {
+  background-color: #2d2d2d;
+  color: #e5e5e7;
+}
+
+body.dark-theme .disabled-input-placeholder {
+  background-color: #2d2d2d;
+  border-color: #3c3c43;
+  color: #86868b;
+}
+
+body.dark-theme .waiting-state {
+  background-color: #252525;
+}
+
+body.dark-theme .waiting-text {
+  color: #86868b;
+}
+
+body.dark-theme .cancel-btn {
+  background-color: #2d2d2d;
+  border-color: #3c3c43;
+  color: #e5e5e7;
+}
+
+body.dark-theme .cancel-btn:hover {
+  background-color: #3c3c43;
+  border-color: #4c4c4f;
+}
+
+/* Dark theme for delete thread button */
+body.dark-theme .delete-thread-btn {
+  background-color: #2d2d2d;
+  border-color: #3c3c43;
+  color: #e5e5e7;
+}
+
+body.dark-theme .delete-thread-btn:hover {
+  background-color: #3c3c43;
+  border-color: #ff3b30;
+  color: #ff3b30;
 }
 

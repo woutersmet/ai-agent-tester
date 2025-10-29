@@ -116,6 +116,23 @@
           ></textarea>
           <button class="send-btn" id="sendBtn">Send</button>
         </div>
+        <div class="input-wrapper-api hidden" id="inputWrapperApi">
+          <select class="api-method-select" id="apiMethodSelect">
+            <option value="GET">GET</option>
+            <option value="POST">POST</option>
+          </select>
+          <input
+            type="text"
+            class="api-url-input"
+            id="apiUrlInput"
+            placeholder="Enter API URL (e.g., https://api.example.com/endpoint)"
+          />
+          <button class="send-btn" id="sendBtnApi">Send</button>
+        </div>
+        <div class="input-wrapper-disabled hidden" id="inputWrapperDisabled">
+          <div class="disabled-input-placeholder">No input required for this command</div>
+          <button class="send-btn" id="sendBtnDisabled">Send</button>
+        </div>
         <div class="waiting-state hidden" id="waitingState">
           <div class="spinner"></div>
           <span class="waiting-text">Waiting for response...</span>

@@ -24,6 +24,12 @@ const statusText = document.getElementById('statusText');
 const apiStatus = document.getElementById('apiStatus');
 const searchInput = document.getElementById('searchInput');
 const inputWrapper = document.getElementById('inputWrapper');
+const inputWrapperApi = document.getElementById('inputWrapperApi');
+const inputWrapperDisabled = document.getElementById('inputWrapperDisabled');
+const apiMethodSelect = document.getElementById('apiMethodSelect');
+const apiUrlInput = document.getElementById('apiUrlInput');
+const sendBtnApi = document.getElementById('sendBtnApi');
+const sendBtnDisabled = document.getElementById('sendBtnDisabled');
 const waitingState = document.getElementById('waitingState');
 const cancelBtn = document.getElementById('cancelBtn');
 const deleteThreadBtn = document.getElementById('deleteThreadBtn');
@@ -147,6 +153,39 @@ function renderCommandSelect() {
   // Default to 'raw-terminal' if it exists
   if (availableCommands.find(cmd => cmd.id === 'raw-terminal')) {
     commandSelect.value = 'raw-terminal';
+    updateInputMode('raw-terminal');
+  }
+}
+
+// Update input mode based on selected command
+function updateInputMode(commandId) {
+  const command = availableCommands.find(cmd => cmd.id === commandId);
+
+  if (!command) {
+    // No command selected, show default input
+    inputWrapper.classList.remove('hidden');
+    inputWrapperApi.classList.add('hidden');
+    inputWrapperDisabled.classList.add('hidden');
+    return;
+  }
+
+  if (command.isApiRequest) {
+    // Show API request inputs
+    inputWrapper.classList.add('hidden');
+    inputWrapperApi.classList.remove('hidden');
+    inputWrapperDisabled.classList.add('hidden');
+    apiUrlInput.focus();
+  } else if (command.requiresInput) {
+    // Show regular text input
+    inputWrapper.classList.remove('hidden');
+    inputWrapperApi.classList.add('hidden');
+    inputWrapperDisabled.classList.add('hidden');
+    messageInput.focus();
+  } else {
+    // Show disabled placeholder
+    inputWrapper.classList.add('hidden');
+    inputWrapperApi.classList.add('hidden');
+    inputWrapperDisabled.classList.remove('hidden');
   }
 }
 
@@ -232,14 +271,24 @@ function renderMessages(messages) {
 async function executeCommand() {
   const commandId = commandSelect.value;
   const userMessage = messageInput.value.trim();
+  const apiMethod = apiMethodSelect.value;
+  const apiUrl = apiUrlInput.value.trim();
 
   if (!commandId) {
     alert('Please select a command to execute');
     return;
   }
 
-  // For raw-terminal command, require user input
-  if (commandId === 'raw-terminal' && !userMessage) {
+  // Get command config
+  const cmdConfig = availableCommands.find(cmd => cmd.id === commandId);
+
+  // Validate inputs based on command type
+  if (cmdConfig && cmdConfig.isApiRequest) {
+    if (!apiUrl) {
+      alert('Please enter an API URL');
+      return;
+    }
+  } else if (commandId === 'raw-terminal' && !userMessage) {
     alert('Please type a command to execute');
     return;
   }
@@ -263,8 +312,10 @@ async function executeCommand() {
   // Create AbortController for fetch cancellation
   const abortController = new AbortController();
 
-  // Show waiting state, hide input wrapper
+  // Show waiting state, hide all input wrappers
   inputWrapper.classList.add('hidden');
+  inputWrapperApi.classList.add('hidden');
+  inputWrapperDisabled.classList.add('hidden');
   waitingState.classList.remove('hidden');
   commandSelect.disabled = true;
 
@@ -279,24 +330,28 @@ async function executeCommand() {
 
     // Immediately add user message to thread
     const userMessageTimestamp = new Date().toISOString();
+
+    // Build content and raw command based on command type
+    let content = '';
+    let rawCommand = '';
+
+    if (cmdConfig && cmdConfig.isApiRequest) {
+      content = `${apiMethod} ${apiUrl}`;
+      rawCommand = `curl -X ${apiMethod} ${apiUrl} -i`;
+    } else if (commandId === 'raw-terminal') {
+      content = userMessage;
+      rawCommand = userMessage;
+    } else {
+      content = userMessage || commandId;
+      rawCommand = commandId;
+    }
+
     const userMessageObj = {
       role: 'user',
-      content: userMessage || commandId,
+      content: content,
       timestamp: userMessageTimestamp,
       commandId: commandId  // Store command ID for display
     };
-
-    // Determine the raw command that will be executed
-    let rawCommand = '';
-    if (commandId === 'raw-terminal') {
-      rawCommand = userMessage;
-    } else {
-      // Get command config to build raw command string
-      const cmdConfig = availableCommands.find(cmd => cmd.id === commandId);
-      if (cmdConfig) {
-        rawCommand = commandId; // Fallback to command ID
-      }
-    }
 
     const userMessageHtml = `
       <div class="message user">
@@ -323,8 +378,9 @@ async function executeCommand() {
     messagesContainer.insertAdjacentHTML('beforeend', thinkingMessageHtml);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
-    // Clear input immediately
+    // Clear inputs immediately
     messageInput.value = '';
+    apiUrlInput.value = '';
 
     // Store abort controller and process ID for cancellation
     window.currentAbortController = abortController;
@@ -342,12 +398,20 @@ async function executeCommand() {
         signal: abortController.signal
       });
     } else {
+      const requestBody = { commandId, userMessage, processId };
+
+      // Add API request parameters if applicable
+      if (cmdConfig && cmdConfig.isApiRequest) {
+        requestBody.apiMethod = apiMethod;
+        requestBody.apiUrl = apiUrl;
+      }
+
       response = await fetch(`${API_BASE_URL}/execute`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ commandId, userMessage, processId }),
+        body: JSON.stringify(requestBody),
         signal: abortController.signal
       });
     }
@@ -479,10 +543,11 @@ async function executeCommand() {
     // Reset UI state
     isExecuting = false;
     shouldCancel = false;
-    inputWrapper.classList.remove('hidden');
     waitingState.classList.add('hidden');
     commandSelect.disabled = false;
-    messageInput.focus();
+
+    // Restore the appropriate input mode
+    updateInputMode(commandSelect.value);
   }
 }
 
@@ -782,9 +847,14 @@ function setupEventListeners() {
 
   // Thread view controls
   sendBtn.addEventListener('click', sendMessage);
+  sendBtnApi.addEventListener('click', sendMessage);
+  sendBtnDisabled.addEventListener('click', sendMessage);
+
   clearBtn.addEventListener('click', () => {
     messageInput.value = '';
+    apiUrlInput.value = '';
     commandSelect.value = '';
+    updateInputMode('');
     updateStatus('Cleared input');
   });
 
@@ -841,11 +911,18 @@ function setupEventListeners() {
     // Shift+Enter will allow default behavior (new line)
   });
 
+  // API URL input - Enter key to send
+  apiUrlInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+
   commandSelect.addEventListener('change', () => {
     if (commandSelect.value) {
       updateStatus(`Selected command: ${commandSelect.value}`);
-      // Focus message input after selecting a command
-      messageInput.focus();
+      updateInputMode(commandSelect.value);
     }
   });
 

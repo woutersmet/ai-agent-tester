@@ -19,18 +19,16 @@ const runningProcesses = new Map();
 
 // Whitelist of allowed commands for security
 const ALLOWED_COMMANDS = {
-  'raw-terminal': { cmd: 'custom', args: [], description: 'Execute raw terminal command', isCustom: true },
-  'gemini': { cmd: 'gemini', args: ['-p', '{{USER_MESSAGE}}'], supportsTemplate: true, description: 'Use Gemini agent with your prompt', isAgent: true },
-  'claude': { cmd: 'claude', args: ['-p', '{{USER_MESSAGE}}'], supportsTemplate: true, description: 'Use Claude CLI with your prompt', isAgent: true },
-  'chatgpt': { cmd: 'chatgpt', args: ['{{USER_MESSAGE}}'], supportsTemplate: true, description: 'Use ChatGPT CLI with your prompt', isAgent: true },
-  'ls': { cmd: 'ls', args: ['-la'], description: 'List files in current folder' },
-  'pwd': { cmd: 'pwd', args: [], description: 'Show current directory path' },
-  'date': { cmd: 'date', args: [], description: 'Show current date and time' },
-  'whoami': { cmd: 'whoami', args: [], description: 'Show current computer user' },
-  'node-version': { cmd: 'node', args: ['--version'], description: 'Show installed version of Node.js' },
-  'npm-version': { cmd: 'npm', args: ['--version'], description: 'Show installed version of npm' },
-  'git-status': { cmd: 'git', args: ['status'], description: 'Show git repository status' },
-  'echo-test': { cmd: 'echo', args: ['Hello from AI Agent Tester!'], description: 'Echo a test message' }
+  'raw-terminal': { cmd: 'custom', args: [], description: 'Execute raw terminal command', isCustom: true, requiresInput: true },
+  'gemini': { cmd: 'gemini', args: ['-p', '{{USER_MESSAGE}}'], supportsTemplate: true, description: 'Use Gemini agent with your prompt', isAgent: true, requiresInput: true },
+  'claude': { cmd: 'claude', args: ['-p', '{{USER_MESSAGE}}'], supportsTemplate: true, description: 'Use Claude CLI with your prompt', isAgent: true, requiresInput: true },
+  'chatgpt': { cmd: 'chatgpt', args: ['{{USER_MESSAGE}}'], supportsTemplate: true, description: 'Use ChatGPT CLI with your prompt', isAgent: true, requiresInput: true },
+  'ls': { cmd: 'ls', args: ['-la'], description: 'List files in current folder', requiresInput: false },
+  'date': { cmd: 'date', args: [], description: 'Show current date and time', requiresInput: false },
+  'whoami': { cmd: 'whoami', args: [], description: 'Show current computer user', requiresInput: false },
+  'node-version': { cmd: 'node', args: ['--version'], description: 'Show installed version of Node.js', requiresInput: false },
+  'echo-test': { cmd: 'echo', args: ['Hello from AI Agent Tester!'], description: 'Echo a test message', requiresInput: false },
+  'api-request': { cmd: 'curl', args: [], description: 'Basic API request', isApiRequest: true, requiresInput: true }
 };
 
 // Health check endpoint
@@ -50,7 +48,9 @@ app.get('/api/commands', (req, res) => {
       id: key,
       description: cmdConfig.description || `Execute ${cmdConfig.cmd} ${cmdConfig.args.join(' ')}`,
       isCustom: cmdConfig.isCustom || false,
-      isAgent: cmdConfig.isAgent || false
+      isAgent: cmdConfig.isAgent || false,
+      isApiRequest: cmdConfig.isApiRequest || false,
+      requiresInput: cmdConfig.requiresInput !== false
     };
   });
   res.json({ commands });
@@ -58,7 +58,7 @@ app.get('/api/commands', (req, res) => {
 
 // Execute a whitelisted command
 app.post('/api/execute', (req, res) => {
-  const { commandId, customArgs, userMessage, processId } = req.body;
+  const { commandId, customArgs, userMessage, processId, apiMethod, apiUrl } = req.body;
 
   if (!commandId || !ALLOWED_COMMANDS[commandId]) {
     return res.status(400).json({
@@ -67,7 +67,80 @@ app.post('/api/execute', (req, res) => {
     });
   }
 
-  const { cmd, args, supportsTemplate, isAgent } = ALLOWED_COMMANDS[commandId];
+  const { cmd, args, supportsTemplate, isAgent, isApiRequest } = ALLOWED_COMMANDS[commandId];
+
+  // Handle API request command specially
+  if (isApiRequest && commandId === 'api-request') {
+    if (!apiUrl) {
+      return res.status(400).json({
+        error: 'API URL is required for api-request command'
+      });
+    }
+
+    const method = apiMethod || 'GET';
+    const curlArgs = ['-X', method, apiUrl, '-i'];
+
+    console.log(`Executing API request: curl ${curlArgs.join(' ')}`);
+
+    const childProcess = spawn('curl', curlArgs);
+    let stdout = '';
+    let stderr = '';
+    let responseSent = false;
+
+    // Store process for cancellation
+    if (processId) {
+      runningProcesses.set(processId, childProcess);
+    }
+
+    childProcess.stdout.on('data', (data) => {
+      stdout += data.toString();
+    });
+
+    childProcess.stderr.on('data', (data) => {
+      stderr += data.toString();
+    });
+
+    childProcess.on('close', (code) => {
+      // Remove from running processes
+      if (processId) {
+        runningProcesses.delete(processId);
+      }
+
+      if (responseSent) {
+        return; // Response already sent
+      }
+      responseSent = true;
+
+      res.json({
+        success: code === 0,
+        exitCode: code,
+        stdout: stdout,
+        stderr: stderr,
+        command: `curl ${curlArgs.join(' ')}`,
+        isAgent: false
+      });
+    });
+
+    childProcess.on('error', (error) => {
+      // Remove from running processes
+      if (processId) {
+        runningProcesses.delete(processId);
+      }
+
+      if (responseSent) {
+        return; // Response already sent
+      }
+      responseSent = true;
+
+      res.status(500).json({
+        success: false,
+        error: error.message,
+        command: `curl ${curlArgs.join(' ')}`
+      });
+    });
+
+    return;
+  }
 
   // If command supports template and userMessage is provided, substitute it
   let finalArgs = customArgs || args;

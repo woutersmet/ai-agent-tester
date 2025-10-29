@@ -40,10 +40,16 @@ function createWindow() {
       nodeIntegration: false,
       contextIsolation: true,
       preload: path.join(__dirname, 'preload.js')
-    }
+    },
+    show: false // Don't show window until it's ready
   });
 
   mainWindow.loadFile('renderer/index.html');
+
+  // Show window when ready to prevent white flash and ensure server is ready
+  mainWindow.once('ready-to-show', () => {
+    mainWindow.show();
+  });
 
   // Open DevTools in development mode
   if (isDev) {
@@ -156,7 +162,12 @@ app.whenReady().then(async () => {
     process.env.USER_DATA_PATH = userDataPath;
     console.log(`📁 User data path: ${userDataPath}`);
 
+    // Start Express server and wait for it to be fully ready
     await startExpressServer();
+
+    // Give the server a moment to fully initialize
+    await new Promise(resolve => setTimeout(resolve, 100));
+
     createMenu();
     createWindow();
 

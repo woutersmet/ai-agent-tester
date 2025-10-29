@@ -29,6 +29,8 @@ const inputWrapperApi = document.getElementById('inputWrapperApi');
 const inputWrapperDisabled = document.getElementById('inputWrapperDisabled');
 const apiMethodSelect = document.getElementById('apiMethodSelect');
 const apiUrlInput = document.getElementById('apiUrlInput');
+const apiTokenInput = document.getElementById('apiTokenInput');
+const apiBodyInput = document.getElementById('apiBodyInput');
 const sendBtnApi = document.getElementById('sendBtnApi');
 const sendBtnDisabled = document.getElementById('sendBtnDisabled');
 const waitingState = document.getElementById('waitingState');
@@ -175,6 +177,12 @@ function updateInputMode(commandId) {
     inputWrapper.classList.add('hidden');
     inputWrapperApi.classList.remove('hidden');
     inputWrapperDisabled.classList.add('hidden');
+    // Hide body input by default (GET is default)
+    if (apiMethodSelect.value === 'POST') {
+      apiBodyInput.classList.remove('hidden');
+    } else {
+      apiBodyInput.classList.add('hidden');
+    }
     apiUrlInput.focus();
   } else if (command.requiresInput) {
     // Show regular text input
@@ -276,6 +284,8 @@ async function executeCommand() {
   const userMessage = messageInput.value.trim();
   const apiMethod = apiMethodSelect.value;
   const apiUrl = apiUrlInput.value.trim();
+  const apiToken = apiTokenInput.value.trim();
+  const apiBody = apiBodyInput.value.trim();
 
   if (!commandId) {
     alert('Please select a command to execute');
@@ -289,6 +299,10 @@ async function executeCommand() {
   if (cmdConfig && cmdConfig.isApiRequest) {
     if (!apiUrl) {
       alert('Please enter an API URL');
+      return;
+    }
+    if (apiMethod === 'POST' && !apiBody) {
+      alert('Please enter a request body for POST requests');
       return;
     }
   } else if (commandId === 'raw-terminal' && !userMessage) {
@@ -340,7 +354,15 @@ async function executeCommand() {
 
     if (cmdConfig && cmdConfig.isApiRequest) {
       content = `${apiMethod} ${apiUrl}`;
-      rawCommand = `curl -X ${apiMethod} ${apiUrl} -i`;
+      // Build curl command with optional token and body
+      rawCommand = `curl -X ${apiMethod}`;
+      if (apiToken) {
+        rawCommand += ` -H "Authorization: Bearer ${apiToken}"`;
+      }
+      if (apiMethod === 'POST' && apiBody) {
+        rawCommand += ` -H "Content-Type: application/json" -d '${apiBody}'`;
+      }
+      rawCommand += ` ${apiUrl} -i`;
     } else if (commandId === 'raw-terminal') {
       content = userMessage;
       rawCommand = userMessage;
@@ -384,6 +406,8 @@ async function executeCommand() {
     // Clear inputs immediately
     messageInput.value = '';
     apiUrlInput.value = '';
+    apiTokenInput.value = '';
+    apiBodyInput.value = '';
 
     // Store abort controller and process ID for cancellation
     window.currentAbortController = abortController;
@@ -407,6 +431,12 @@ async function executeCommand() {
       if (cmdConfig && cmdConfig.isApiRequest) {
         requestBody.apiMethod = apiMethod;
         requestBody.apiUrl = apiUrl;
+        if (apiToken) {
+          requestBody.apiToken = apiToken;
+        }
+        if (apiMethod === 'POST' && apiBody) {
+          requestBody.apiBody = apiBody;
+        }
       }
 
       response = await fetch(`${API_BASE_URL}/execute`, {
@@ -869,9 +899,20 @@ function setupEventListeners() {
   sendBtnApi.addEventListener('click', sendMessage);
   sendBtnDisabled.addEventListener('click', sendMessage);
 
+  // API method change handler - show/hide body input for POST
+  apiMethodSelect.addEventListener('change', (e) => {
+    if (e.target.value === 'POST') {
+      apiBodyInput.classList.remove('hidden');
+    } else {
+      apiBodyInput.classList.add('hidden');
+    }
+  });
+
   clearBtn.addEventListener('click', () => {
     messageInput.value = '';
     apiUrlInput.value = '';
+    apiTokenInput.value = '';
+    apiBodyInput.value = '';
     commandSelect.value = '';
     updateInputMode('');
     updateStatus('Cleared input');

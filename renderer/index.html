@@ -120,16 +120,30 @@
           <button class="send-btn" id="sendBtn">Send</button>
         </div>
         <div class="input-wrapper-api hidden" id="inputWrapperApi">
-          <select class="api-method-select" id="apiMethodSelect">
-            <option value="GET">GET</option>
-            <option value="POST">POST</option>
-          </select>
+          <div class="api-request-row">
+            <select class="api-method-select" id="apiMethodSelect">
+              <option value="GET">GET</option>
+              <option value="POST">POST</option>
+            </select>
+            <input
+              type="text"
+              class="api-url-input"
+              id="apiUrlInput"
+              placeholder="Enter API URL (e.g., https://api.example.com/endpoint)"
+            />
+          </div>
           <input
             type="text"
-            class="api-url-input"
-            id="apiUrlInput"
-            placeholder="Enter API URL (e.g., https://api.example.com/endpoint)"
+            class="api-token-input"
+            id="apiTokenInput"
+            placeholder="Access token (optional)"
           />
+          <textarea
+            class="api-body-input hidden"
+            id="apiBodyInput"
+            placeholder="Request body (JSON)"
+            rows="3"
+          ></textarea>
           <button class="send-btn" id="sendBtnApi">Send</button>
         </div>
         <div class="input-wrapper-disabled hidden" id="inputWrapperDisabled">

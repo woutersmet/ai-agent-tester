@@ -602,12 +602,18 @@ body {
 
 .input-wrapper-api {
   display: flex;
+  flex-direction: column;
   gap: 12px;
-  align-items: center;
 }
 
 .input-wrapper-api.hidden {
   display: none;
+}
+
+.api-request-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
 }
 
 .input-wrapper-disabled {
@@ -674,6 +680,47 @@ body {
   outline: none;
   border-color: #007aff;
   box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+}
+
+.api-token-input {
+  width: 100%;
+  padding: 12px;
+  background-color: #ffffff;
+  border: 1px solid #d1d1d6;
+  border-radius: 8px;
+  color: #1d1d1f;
+  font-size: 14px;
+  font-family: inherit;
+  height: 44px;
+}
+
+.api-token-input:focus {
+  outline: none;
+  border-color: #007aff;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+}
+
+.api-body-input {
+  width: 100%;
+  padding: 12px;
+  background-color: #ffffff;
+  border: 1px solid #d1d1d6;
+  border-radius: 8px;
+  color: #1d1d1f;
+  font-size: 14px;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  resize: vertical;
+  min-height: 60px;
+}
+
+.api-body-input:focus {
+  outline: none;
+  border-color: #007aff;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+}
+
+.api-body-input.hidden {
+  display: none;
 }
 
 .disabled-input-placeholder {

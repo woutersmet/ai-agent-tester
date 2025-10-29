@@ -23,12 +23,11 @@ const ALLOWED_COMMANDS = {
   'gemini': { cmd: 'gemini', args: ['-p', '{{USER_MESSAGE}}'], supportsTemplate: true, description: 'Use Gemini agent with your prompt', isAgent: true, requiresInput: true },
   'claude': { cmd: 'claude', args: ['-p', '{{USER_MESSAGE}}'], supportsTemplate: true, description: 'Use Claude CLI with your prompt', isAgent: true, requiresInput: true },
   'chatgpt': { cmd: 'chatgpt', args: ['{{USER_MESSAGE}}'], supportsTemplate: true, description: 'Use ChatGPT CLI with your prompt', isAgent: true, requiresInput: true },
+  'api-request': { cmd: 'curl', args: [], description: 'Basic API request', isApiRequest: true, requiresInput: true },
   'ls': { cmd: 'ls', args: ['-la'], description: 'List files in current folder', requiresInput: false },
-  'date': { cmd: 'date', args: [], description: 'Show current date and time', requiresInput: false },
   'whoami': { cmd: 'whoami', args: [], description: 'Show current computer user', requiresInput: false },
   'node-version': { cmd: 'node', args: ['--version'], description: 'Show installed version of Node.js', requiresInput: false },
-  'echo-test': { cmd: 'echo', args: ['Hello from AI Agent Tester!'], description: 'Echo a test message', requiresInput: false },
-  'api-request': { cmd: 'curl', args: [], description: 'Basic API request', isApiRequest: true, requiresInput: true }
+  'echo-test': { cmd: 'echo', args: ['Hello from AI Agent Tester!'], description: 'Echo a test message', requiresInput: false }
 };
 
 // Health check endpoint
@@ -58,7 +57,7 @@ app.get('/api/commands', (req, res) => {
 
 // Execute a whitelisted command
 app.post('/api/execute', (req, res) => {
-  const { commandId, customArgs, userMessage, processId, apiMethod, apiUrl } = req.body;
+  const { commandId, customArgs, userMessage, processId, apiMethod, apiUrl, apiToken, apiBody } = req.body;
 
   if (!commandId || !ALLOWED_COMMANDS[commandId]) {
     return res.status(400).json({
@@ -78,7 +77,20 @@ app.post('/api/execute', (req, res) => {
     }
 
     const method = apiMethod || 'GET';
-    const curlArgs = ['-X', method, apiUrl, '-i'];
+    const curlArgs = ['-X', method];
+
+    // Add Authorization header if token is provided
+    if (apiToken) {
+      curlArgs.push('-H', `Authorization: Bearer ${apiToken}`);
+    }
+
+    // Add body for POST requests
+    if (method === 'POST' && apiBody) {
+      curlArgs.push('-H', 'Content-Type: application/json');
+      curlArgs.push('-d', apiBody);
+    }
+
+    curlArgs.push(apiUrl, '-i');
 
     console.log(`Executing API request: curl ${curlArgs.join(' ')}`);
 

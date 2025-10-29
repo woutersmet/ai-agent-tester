@@ -356,20 +356,8 @@ function renderMessages(messages) {
     let contentHtml = '';
     if (msg.role === 'system' && msg.content) {
       const processed = processCurlResponse(msg.content);
-
-      if (processed.hasJson) {
-        // Show processed output (status line + body) and formatted JSON separately
-        contentHtml = `
-          <div class="message-content">${escapeHtml(processed.processed)}</div>
-          <div class="message-json-container">
-            <div class="message-json-header">Formatted JSON Response:</div>
-            <pre class="message-json">${escapeHtml(processed.jsonFormatted)}</pre>
-          </div>
-        `;
-      } else {
-        // Just show the processed output
-        contentHtml = `<div class="message-content">${escapeHtml(processed.processed)}</div>`;
-      }
+      // Show the processed output (which includes formatted JSON if detected)
+      contentHtml = `<div class="message-content">${escapeHtml(processed.processed)}</div>`;
     } else {
       contentHtml = `<div class="message-content">${escapeHtml(msg.content)}</div>`;
     }
@@ -659,25 +647,11 @@ async function executeCommand() {
     // Process the output for curl responses and JSON
     const processed = processCurlResponse(outputContent);
 
-    let contentHtml = '';
-    if (processed.hasJson) {
-      // Show processed output (status line + body) and formatted JSON separately
-      contentHtml = `
-        <div class="message-content">${escapeHtml(processed.processed)}</div>
-        <div class="message-json-container">
-          <div class="message-json-header">Formatted JSON Response:</div>
-          <pre class="message-json">${escapeHtml(processed.jsonFormatted)}</pre>
-        </div>
-      `;
-    } else {
-      // Just show the processed output
-      contentHtml = `<div class="message-content">${escapeHtml(processed.processed)}</div>`;
-    }
-
+    // Show the processed output (which includes formatted JSON if detected)
     const systemMessageHtml = `
       <div class="message system">
         <div class="message-role">system</div>
-        ${contentHtml}
+        <div class="message-content">${escapeHtml(processed.processed)}</div>
         <div class="message-time">${formatTime(systemMessageTimestamp)}</div>
       </div>
     `;
@@ -1161,16 +1135,10 @@ function processCurlResponse(output) {
     }
   }
 
-  // If we found headers, extract just the status line and body
-  let processedOutput = output;
-  if (statusLine && foundBlankLine) {
-    const bodyLines = lines.slice(bodyStartIndex);
-    const body = bodyLines.join('\n').trim();
-    processedOutput = statusLine + '\n\n' + body;
-  }
+  // Extract the body
+  const bodyText = foundBlankLine ? lines.slice(bodyStartIndex).join('\n').trim() : output;
 
-  // Try to detect and extract JSON from the body
-  const bodyText = foundBlankLine ? lines.slice(bodyStartIndex).join('\n').trim() : processedOutput;
+  // Try to detect and format JSON from the body
   let jsonData = null;
   let jsonFormatted = null;
 
@@ -1182,8 +1150,24 @@ function processCurlResponse(output) {
     // Not valid JSON, that's okay
   }
 
+  // Build the final output
+  let finalOutput = '';
+  if (statusLine && foundBlankLine) {
+    // If we have headers, include the status line
+    finalOutput = statusLine + '\n\n';
+    // If we have formatted JSON, use that instead of raw body
+    if (jsonFormatted) {
+      finalOutput += jsonFormatted;
+    } else {
+      finalOutput += bodyText;
+    }
+  } else {
+    // No headers detected, just use the formatted JSON or original output
+    finalOutput = jsonFormatted || output;
+  }
+
   return {
-    processed: processedOutput,
+    processed: finalOutput,
     hasJson: jsonData !== null,
     jsonFormatted: jsonFormatted
   };

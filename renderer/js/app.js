@@ -36,6 +36,7 @@ const sendBtnDisabled = document.getElementById('sendBtnDisabled');
 const waitingState = document.getElementById('waitingState');
 const cancelBtn = document.getElementById('cancelBtn');
 const deleteSessionBtn = document.getElementById('deleteSessionBtn');
+const quickActions = document.getElementById('quickActions');
 
 // View elements
 const sessionsView = document.getElementById('sessionsView');
@@ -163,9 +164,61 @@ function renderCommandSelect() {
   }
 }
 
+// Update quick action buttons based on selected command
+function updateQuickActions(commandId) {
+  // Define quick actions for each command type
+  const quickActionsMap = {
+    'gemini': [
+      { label: 'List MCP & Tools', command: 'gemini mcp list --servers' }
+    ],
+    'claude': [
+      { label: 'List MCP & Tools', command: 'claude mcp list' }
+    ],
+    'chatgpt': [
+      { label: 'List MCP & Tools', command: 'codex mcp list' }
+    ],
+    'raw-terminal': [
+      { label: 'ls', command: 'ls' },
+      { label: 'whoami', command: 'whoami' }
+    ]
+  };
+
+  const actions = quickActionsMap[commandId];
+
+  if (actions && actions.length > 0) {
+    // Show quick actions and populate buttons
+    quickActions.classList.remove('hidden');
+    quickActions.innerHTML = actions.map(action => `
+      <button class="quick-action-btn" data-command="${action.command}">
+        ${action.label}
+      </button>
+    `).join('');
+
+    // Add click handlers to quick action buttons
+    quickActions.querySelectorAll('.quick-action-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const command = btn.dataset.command;
+
+        // Set the command in the input field
+        messageInput.value = command;
+
+        // Execute the command immediately
+        await executeCommand();
+      });
+    });
+  } else {
+    // Hide quick actions if no actions for this command
+    quickActions.classList.add('hidden');
+    quickActions.innerHTML = '';
+  }
+}
+
 // Update input mode based on selected command
 function updateInputMode(commandId) {
   const command = availableCommands.find(cmd => cmd.id === commandId);
+
+  // Update quick actions
+  updateQuickActions(commandId);
 
   if (!command) {
     // No command selected, show default input

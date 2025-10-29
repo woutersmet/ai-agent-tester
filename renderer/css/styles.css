@@ -590,6 +590,40 @@ body {
   font-size: 12px;
 }
 
+.quick-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.quick-actions.hidden {
+  display: none;
+}
+
+.quick-action-btn {
+  padding: 4px 10px;
+  background-color: #f5f5f7;
+  border: 1px solid #d1d1d6;
+  border-radius: 4px;
+  color: #6e6e73;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 500;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.quick-action-btn:hover {
+  background-color: #e8e8ed;
+  border-color: #007aff;
+  color: #1d1d1f;
+}
+
+.quick-action-btn:active {
+  transform: scale(0.98);
+}
+
 .input-wrapper {
   display: flex;
   gap: 12px;
@@ -1501,6 +1535,18 @@ body.dark-theme .toolbar-btn {
 body.dark-theme .toolbar-btn:hover {
   background-color: #3c3c43;
   border-color: #007aff;
+}
+
+body.dark-theme .quick-action-btn {
+  background-color: #2d2d2d;
+  border-color: #3c3c43;
+  color: #86868b;
+}
+
+body.dark-theme .quick-action-btn:hover {
+  background-color: #3c3c43;
+  border-color: #007aff;
+  color: #e5e5e7;
 }
 
 body.dark-theme .command-select {

@@ -151,9 +151,21 @@ function updateInputMode(commandId) {
 
 ## Behavior
 
+### Command Order and Default Selection
+
+Commands are now ordered as follows:
+1. **Gemini** (default selection)
+2. Claude
+3. ChatGPT
+4. API Request
+5. Raw Terminal
+6. Other utility commands (ls, whoami, node-version, echo-test)
+
+When the application starts, **Gemini is automatically selected** as the default command.
+
 ### Quick Action Buttons by CLI Type
 
-1. **Gemini CLI** (`gemini` command selected)
+1. **Gemini CLI** (`gemini` command selected - DEFAULT)
    - Button: "List MCP & Tools"
    - Command: `gemini mcp list --servers`
 
@@ -196,6 +208,21 @@ function updateInputMode(commandId) {
 - Quick action buttons are shown/hidden automatically when the command selection changes
 - They appear **below the input area** at the bottom of the input section
 - They are only visible when a supported CLI command (gemini, claude, chatgpt, or raw-terminal) is selected
+
+### Command Display Behavior
+
+**For Agent Commands (Gemini, Claude, ChatGPT):**
+- The user message initially shows only the prompt content
+- After the server executes the command, the full command is retrieved and displayed
+- Example: User types "hi" → Server executes `gemini -p "hi"` → Display shows `$ gemini -p hi`
+
+**For Raw Terminal:**
+- The full command is known immediately and displayed right away
+- Example: User types "ls -la" → Display shows `$ ls -la` immediately
+
+**For API Requests:**
+- The full curl command is constructed on the frontend and displayed immediately
+- Example: GET request to https://api.example.com → Display shows `$ curl -X GET https://api.example.com -i`
 
 ## Design Rationale
 
@@ -247,30 +274,36 @@ const quickActionsMap = {
 To test the feature:
 
 1. Start the application: `npm start`
-2. Select "gemini" from the command dropdown
+2. Verify that "gemini" is automatically selected as the default command
 3. Verify that a "List MCP & Tools" button appears below the input area
 4. Click the button and verify that the command executes immediately
 5. Select "claude" and test the "List MCP & Tools" button
 6. Select "chatgpt" and test the "List MCP & Tools" button
 7. Select "raw-terminal" and verify that "ls" and "whoami" buttons appear
-8. Click the "ls" button and verify it executes immediately
-9. Click the "whoami" button and verify it executes immediately
-10. Select a different command (e.g., "node-version") and verify that the quick actions are hidden
-11. Test in both light and dark themes
+8. Click the "ls" button and verify it executes immediately with the full command shown in the user message
+9. Click the "whoami" button and verify it executes immediately with the full command shown
+10. Test typing a custom command in raw-terminal (e.g., `ls -la`) and verify the full command is displayed
+11. Select a different command (e.g., "node-version") and verify that the quick actions are hidden
+12. Test in both light and dark themes
 
 ## Files Modified
 
-1. **`renderer/index.html`**
+1. **`server/app.js`**
+   - Reordered `ALLOWED_COMMANDS` to put Gemini first, followed by Claude, ChatGPT, API Request, then Raw Terminal (Lines 20-31)
+
+2. **`renderer/index.html`**
    - Added `<div class="quick-actions hidden" id="quickActions">` container below all input areas (Line 160)
 
-2. **`renderer/css/styles.css`**
+3. **`renderer/css/styles.css`**
    - Added `.quick-actions` and `.quick-action-btn` styles with `margin-top: 12px`
    - Added dark theme styles for quick action buttons
 
-3. **`renderer/js/app.js`**
+4. **`renderer/js/app.js`**
    - Added `quickActions` DOM element reference (Line 39)
-   - Added `updateQuickActions(commandId)` function with immediate execution (Lines 167-214)
-   - Updated `updateInputMode(commandId)` to call `updateQuickActions()` (Line 216)
+   - Added `updateQuickActions(commandId)` function with immediate execution (Lines 170-217)
+   - Updated `renderCommandSelect()` to default to 'gemini' instead of 'raw-terminal' (Lines 154-168)
+   - Updated `updateInputMode(commandId)` to call `updateQuickActions()`
+   - **Fixed command display**: Set `rawCommand = ''` for agent commands (gemini, claude, chatgpt) so the full command from server response is displayed (Line 431)
 
 ## Benefits
 

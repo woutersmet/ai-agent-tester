@@ -157,10 +157,13 @@ function renderCommandSelect() {
     <option value="${cmd.id}">${cmd.id} - ${cmd.description}</option>
   `).join('');
 
-  // Default to 'raw-terminal' if it exists
-  if (availableCommands.find(cmd => cmd.id === 'raw-terminal')) {
-    commandSelect.value = 'raw-terminal';
-    updateInputMode('raw-terminal');
+  // Default to 'gemini' if it exists, otherwise fall back to first command
+  if (availableCommands.find(cmd => cmd.id === 'gemini')) {
+    commandSelect.value = 'gemini';
+    updateInputMode('gemini');
+  } else if (availableCommands.length > 0) {
+    commandSelect.value = availableCommands[0].id;
+    updateInputMode(availableCommands[0].id);
   }
 }
 
@@ -422,6 +425,20 @@ async function executeCommand() {
     } else if (commandId === 'raw-terminal') {
       content = userMessage;
       rawCommand = userMessage;
+    } else if (cmdConfig && cmdConfig.isAgent) {
+      // For agent commands (gemini, claude, chatgpt), construct the full command
+      content = userMessage || commandId;
+
+      // Build the command string based on the command type
+      if (commandId === 'gemini') {
+        rawCommand = `gemini -p "${userMessage}"`;
+      } else if (commandId === 'claude') {
+        rawCommand = `claude -p "${userMessage}"`;
+      } else if (commandId === 'chatgpt') {
+        rawCommand = `chatgpt "${userMessage}"`;
+      } else {
+        rawCommand = `${commandId} "${userMessage}"`;
+      }
     } else {
       content = userMessage || commandId;
       rawCommand = commandId;
@@ -530,35 +547,6 @@ async function executeCommand() {
     }
 
     result = await response.json();
-
-    // Update raw command display with actual executed command
-    if (result.command) {
-      // Update the user message object with the command
-      userMessageObj.command = result.command;
-
-      // Update the display
-      const lastUserMessage = messagesContainer.querySelector('.message.user:last-of-type');
-      if (lastUserMessage) {
-        const existingCommand = lastUserMessage.querySelector('.message-command');
-        if (existingCommand) {
-          existingCommand.textContent = `$ ${result.command}`;
-        } else {
-          const commandDiv = document.createElement('div');
-          commandDiv.className = 'message-command';
-          commandDiv.textContent = `$ ${result.command}`;
-          const timeDiv = lastUserMessage.querySelector('.message-time');
-          if (timeDiv) {
-            lastUserMessage.insertBefore(commandDiv, timeDiv);
-          }
-        }
-      }
-
-      // Re-save the user message with the command
-      const commandSaved = await saveMessage(currentSessionId, userMessageObj);
-      if (!commandSaved) {
-        console.error('Failed to update user message with command');
-      }
-    }
 
     // Check if cancelled before proceeding
     if (shouldCancel) {

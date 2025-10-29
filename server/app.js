@@ -19,11 +19,11 @@ const runningProcesses = new Map();
 
 // Whitelist of allowed commands for security
 const ALLOWED_COMMANDS = {
-  'raw-terminal': { cmd: 'custom', args: [], description: 'Execute raw terminal command', isCustom: true, requiresInput: true },
   'gemini': { cmd: 'gemini', args: ['-p', '{{USER_MESSAGE}}'], supportsTemplate: true, description: 'Use Gemini agent with your prompt', isAgent: true, requiresInput: true },
   'claude': { cmd: 'claude', args: ['-p', '{{USER_MESSAGE}}'], supportsTemplate: true, description: 'Use Claude CLI with your prompt', isAgent: true, requiresInput: true },
   'chatgpt': { cmd: 'chatgpt', args: ['{{USER_MESSAGE}}'], supportsTemplate: true, description: 'Use ChatGPT CLI with your prompt', isAgent: true, requiresInput: true },
   'api-request': { cmd: 'curl', args: [], description: 'Basic API request', isApiRequest: true, requiresInput: true },
+  'raw-terminal': { cmd: 'custom', args: [], description: 'Execute raw terminal command', isCustom: true, requiresInput: true },
   'ls': { cmd: 'ls', args: ['-la'], description: 'List files in current folder', requiresInput: false },
   'whoami': { cmd: 'whoami', args: [], description: 'Show current computer user', requiresInput: false },
   'node-version': { cmd: 'node', args: ['--version'], description: 'Show installed version of Node.js', requiresInput: false },

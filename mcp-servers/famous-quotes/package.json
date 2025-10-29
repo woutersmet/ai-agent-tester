@@ -1,0 +1,22 @@
+{
+  "name": "famous-quotes-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP server that provides access to famous quotes",
+  "main": "famous-quotes-mcp-server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node famous-quotes-mcp-server.js",
+    "test": "node test-mcp-server.js"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "quotes"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4"
+  }
+}
+

@@ -4,7 +4,6 @@
   "version": "1.0.0",
   "description": "AI Agent Tester - Electron app with Express backend for testing AI agents with command execution",
   "main": "main.js",
-  "type": "module",
   "scripts": {
     "start": "electron .",
     "dev": "electron . --dev",

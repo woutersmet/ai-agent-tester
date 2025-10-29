@@ -53,10 +53,8 @@ function createWindow() {
     mainWindow.show();
   });
 
-  // Open DevTools in development mode
-  if (isDev) {
-    mainWindow.webContents.openDevTools();
-  }
+  // DevTools can be toggled with View > Toggle Developer Tools in the menu
+  // or by pressing Cmd+Option+I (Mac) / Ctrl+Shift+I (Windows/Linux)
 
   mainWindow.on('closed', () => {
     mainWindow = null;

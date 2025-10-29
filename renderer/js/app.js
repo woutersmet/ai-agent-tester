@@ -323,9 +323,6 @@ function renderMessages(messages) {
       commandHtml = `
         <div class="message-command-wrapper">
           <div class="message-command">$ ${escapeHtml(msg.command)}</div>
-          <button class="copy-command-btn" data-command="${escapeHtml(msg.command)}" title="Copy command">
-            <i data-lucide="copy" class="copy-icon"></i>
-          </button>
         </div>
       `;
     }
@@ -464,9 +461,6 @@ async function executeCommand() {
     const commandHtml = rawCommand ? `
       <div class="message-command-wrapper">
         <div class="message-command">$ ${escapeHtml(rawCommand)}</div>
-        <button class="copy-command-btn" data-command="${escapeHtml(rawCommand)}" title="Copy command">
-          <i data-lucide="copy" class="copy-icon"></i>
-        </button>
       </div>
     ` : '';
 
@@ -1123,15 +1117,6 @@ function setupEventListeners() {
     commandSelect.value = '';
     updateInputMode('');
     updateStatus('Cleared input');
-  });
-
-  // Copy command button - use event delegation since buttons are dynamically added
-  messagesContainer.addEventListener('click', (e) => {
-    const copyBtn = e.target.closest('.copy-command-btn');
-    if (copyBtn) {
-      const command = copyBtn.dataset.command;
-      copyToClipboard(command, copyBtn);
-    }
   });
 
   // Cancel button

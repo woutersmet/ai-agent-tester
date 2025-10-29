@@ -99,6 +99,9 @@ app.post('/api/execute', (req, res) => {
     let stderr = '';
     let responseSent = false;
 
+    // Close stdin immediately to prevent the process from hanging
+    childProcess.stdin.end();
+
     // Store process for cancellation
     if (processId) {
       runningProcesses.set(processId, childProcess);
@@ -168,6 +171,10 @@ app.post('/api/execute', (req, res) => {
   let stdout = '';
   let stderr = '';
   let responseSent = false;
+
+  // Close stdin immediately to prevent the process from hanging
+  // Many CLI tools (like claude, gemini, chatgpt) wait for stdin to close
+  childProcess.stdin.end();
 
   // Store process for cancellation
   if (processId) {

@@ -579,7 +579,9 @@ async function executeCommand() {
     if (thinkingMsg) thinkingMsg.remove();
 
     // Add system message with output
-    const outputContent = result.success ? result.stdout : (result.stderr || result.error);
+    // Show stdout if available, otherwise stderr, otherwise error message
+    // Many CLIs write errors to stdout, not stderr
+    const outputContent = result.stdout || result.stderr || result.error || 'No output';
     const systemMessageTimestamp = new Date().toISOString();
     const systemMessageObj = {
       role: 'system',

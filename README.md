@@ -202,25 +202,60 @@ npm install --save-dev electron-reload
 
 ## 📦 Building for Distribution
 
-To package the app for distribution, install electron-builder:
+The app is configured with **electron-builder** to create professional macOS installers (.dmg files).
+
+### Build Commands
 
 ```bash
-npm install --save-dev electron-builder
+# Build for macOS (creates DMG installers for both Intel and Apple Silicon)
+npm run build
+
+# Build DMG only
+npm run build:dmg
+
+# Build without packaging (for testing)
+npm run build:dir
 ```
 
-Add to `package.json`:
+### What Gets Built
+
+Running `npm run build` will create:
+
+- `dist/AI Agent Tester-1.0.0-x64.dmg` - For Intel Macs
+- `dist/AI Agent Tester-1.0.0-arm64.dmg` - For Apple Silicon (M1/M2/M3) Macs
+
+### Installing the DMG
+
+1. Double-click the `.dmg` file
+2. Drag "AI Agent Tester" to the Applications folder
+3. Launch from Applications or Spotlight
+
+### Code Signing (Optional)
+
+For public distribution, you should sign the app with an Apple Developer certificate:
+
+1. Get an Apple Developer account ($99/year)
+2. Create a "Developer ID Application" certificate
+3. Add to `package.json`:
 
 ```json
-"scripts": {
-  "build": "electron-builder --mac"
+"build": {
+  "mac": {
+    "identity": "Developer ID Application: Your Name (TEAM_ID)"
+  }
 }
 ```
 
-Then run:
+Without code signing, users will see a security warning on first launch (they can bypass it by right-clicking and selecting "Open").
 
-```bash
-npm run build
-```
+### Build Configuration
+
+The build configuration is in `package.json` under the `"build"` field. Key settings:
+
+- **appId**: `com.aiagent.tester` - Unique identifier for your app
+- **icon**: `build/icon.icns` - App icon (auto-generated from PNG)
+- **target**: Builds for both `x64` (Intel) and `arm64` (Apple Silicon)
+- **output**: `dist/` directory
 
 ## 🐛 Troubleshooting
 

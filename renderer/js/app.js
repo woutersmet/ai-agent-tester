@@ -14,6 +14,7 @@ let shouldCancel = false;
 const threadList = document.getElementById('threadList');
 const messagesContainer = document.getElementById('messagesContainer');
 const threadTitle = document.getElementById('threadTitle');
+const threadTimestamp = document.getElementById('threadTimestamp');
 const messageInput = document.getElementById('messageInput');
 const sendBtn = document.getElementById('sendBtn');
 const clearBtn = document.getElementById('clearBtn');
@@ -220,6 +221,7 @@ async function loadThreadDetails(threadId) {
       const localThread = threads.find(t => t.id === threadId);
       if (localThread) {
         threadTitle.textContent = localThread.title;
+        threadTimestamp.textContent = `Started ${formatTime(localThread.timestamp)}`;
         messagesContainer.innerHTML = '<div class="loading">No messages in this session yet. Start a conversation!</div>';
         updateStatus('New session ready');
         return;
@@ -230,6 +232,7 @@ async function loadThreadDetails(threadId) {
     const thread = await response.json();
 
     threadTitle.textContent = thread.title;
+    threadTimestamp.textContent = `Started ${formatTime(thread.timestamp)}`;
     renderMessages(thread.messages);
     updateStatus('Session loaded');
   } catch (error) {
@@ -727,6 +730,10 @@ async function deleteCurrentThread() {
   try {
     updateStatus(`Deleting session ${currentThreadId}...`);
 
+    // Find the index of the current thread before deleting
+    const threadsToSearch = filteredThreads.length > 0 ? filteredThreads : threads;
+    const currentIndex = threadsToSearch.findIndex(t => t.id === currentThreadId);
+
     const response = await fetch(`${API_BASE_URL}/threads/${currentThreadId}`, {
       method: 'DELETE'
     });
@@ -734,6 +741,9 @@ async function deleteCurrentThread() {
     if (!response.ok) {
       throw new Error('Failed to delete thread');
     }
+
+    // Store the deleted thread ID
+    const deletedThreadId = currentThreadId;
 
     // Remove from local threads array
     threads = threads.filter(t => t.id !== currentThreadId);
@@ -745,32 +755,41 @@ async function deleteCurrentThread() {
       filteredThreads = threads;
     }
 
-    // Clear current thread
-    const deletedThreadId = currentThreadId;
-    currentThreadId = null;
-
-    // Hide delete button
-    deleteThreadBtn.classList.add('hidden');
-
-    // Reset thread view
-    threadTitle.textContent = 'Select a session';
-    messagesContainer.innerHTML = `
-      <div class="welcome-message">
-        <div class="welcome-icon">
-          <i data-lucide="trash-2" class="welcome-icon-svg"></i>
-        </div>
-        <h2>Session Deleted</h2>
-        <p>The session has been successfully deleted.</p>
-      </div>
-    `;
-
-    // Re-initialize Lucide icons
-    if (typeof lucide !== 'undefined') {
-      lucide.createIcons();
-    }
-
     // Render updated thread list
     renderThreadList();
+
+    // Select the next thread (or previous if at the end)
+    const updatedThreadsToSearch = filteredThreads.length > 0 ? filteredThreads : threads;
+
+    if (updatedThreadsToSearch.length > 0) {
+      // Try to select the thread at the same index (which is now the next older thread)
+      // If we deleted the last thread, select the new last thread
+      const nextIndex = Math.min(currentIndex, updatedThreadsToSearch.length - 1);
+      const nextThread = updatedThreadsToSearch[nextIndex];
+
+      if (nextThread) {
+        await selectThread(nextThread.id);
+      }
+    } else {
+      // No threads left
+      currentThreadId = null;
+      deleteThreadBtn.classList.add('hidden');
+      threadTitle.textContent = 'No sessions';
+      messagesContainer.innerHTML = `
+        <div class="welcome-message">
+          <div class="welcome-icon">
+            <i data-lucide="inbox" class="welcome-icon-svg"></i>
+          </div>
+          <h2>No Sessions</h2>
+          <p>Create a new session to get started.</p>
+        </div>
+      `;
+
+      // Re-initialize Lucide icons
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    }
 
     updateStatus(`Session ${deletedThreadId} deleted successfully`);
     console.log('Deleted thread:', deletedThreadId);
@@ -959,26 +978,38 @@ function formatTime(timestamp) {
   const date = new Date(timestamp);
   const now = new Date();
   const diff = now - date;
-  
+
   // Less than 1 minute
   if (diff < 60000) {
     return 'Just now';
   }
-  
+
   // Less than 1 hour
   if (diff < 3600000) {
     const minutes = Math.floor(diff / 60000);
     return `${minutes}m ago`;
   }
-  
+
   // Less than 24 hours
   if (diff < 86400000) {
     const hours = Math.floor(diff / 3600000);
     return `${hours}h ago`;
   }
-  
+
   // Format as date
   return date.toLocaleDateString();
+}
+
+function formatTimestamp(timestamp) {
+  const date = new Date(timestamp);
+  const options = {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  };
+  return date.toLocaleString('en-US', options);
 }
 
 function escapeHtml(text) {

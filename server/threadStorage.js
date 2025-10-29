@@ -260,27 +260,43 @@ async function saveThread(thread) {
  */
 async function addMessageToThread(threadId, message) {
   try {
-    const thread = await getThreadById(threadId);
+    // Find the thread and the file it's in
+    const files = await fs.readdir(THREADS_DIR);
+    const jsonFiles = files.filter(f => f.endsWith('.json'));
 
-    if (!thread) {
-      console.error(`Thread ${threadId} not found`);
-      return false;
+    for (const file of jsonFiles) {
+      const filepath = path.join(THREADS_DIR, file);
+      const content = await fs.readFile(filepath, 'utf-8');
+      const threads = JSON.parse(content);
+
+      const threadIndex = threads.findIndex(t => t.id === threadId);
+      if (threadIndex >= 0) {
+        const thread = threads[threadIndex];
+
+        // Add message
+        if (!thread.messages) {
+          thread.messages = [];
+        }
+        thread.messages.push(message);
+
+        // Update preview with latest message
+        thread.preview = message.content.substring(0, 100) + (message.content.length > 100 ? '...' : '');
+
+        // Update timestamp but keep in same file
+        thread.timestamp = message.timestamp;
+
+        // Update the thread in the array
+        threads[threadIndex] = thread;
+
+        // Write back to the SAME file
+        await fs.writeFile(filepath, JSON.stringify(threads, null, 2));
+        console.log(`✅ Added message to thread ${threadId} in ${file}`);
+        return true;
+      }
     }
 
-    // Add message
-    if (!thread.messages) {
-      thread.messages = [];
-    }
-    thread.messages.push(message);
-
-    // Update preview with latest message
-    thread.preview = message.content.substring(0, 100) + (message.content.length > 100 ? '...' : '');
-
-    // Update timestamp
-    thread.timestamp = message.timestamp;
-
-    // Save thread
-    return await saveThread(thread);
+    console.error(`Thread ${threadId} not found`);
+    return false;
   } catch (error) {
     console.error('Error adding message to thread:', error);
     return false;

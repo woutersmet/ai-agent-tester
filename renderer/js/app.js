@@ -398,6 +398,26 @@ async function executeCommand() {
       // Continue anyway - message is shown in UI
     }
 
+    // Update session title if this is the first command (title is still "New Session")
+    const currentSession = sessions.find(s => s.id === currentSessionId);
+    if (currentSession && currentSession.title === 'New Session') {
+      const newTitle = generateSessionTitle(commandId, userMessage);
+      currentSession.title = newTitle;
+      currentSession.preview = content.substring(0, 100) + (content.length > 100 ? '...' : '');
+
+      // Update the UI
+      sessionTitle.textContent = newTitle;
+
+      // Save updated session to backend
+      const sessionSaved = await saveSession(currentSession);
+      if (!sessionSaved) {
+        console.error('Failed to update session title');
+      }
+
+      // Re-render session list to show new title
+      renderSessionList();
+    }
+
     // Add "thinking..." message
     const thinkingMessageHtml = `
       <div class="message assistant thinking" id="thinkingMessage">
@@ -632,6 +652,34 @@ function searchSessions(query) {
 
   renderSessionList();
   updateStatus(searchQuery ? `Found ${filteredSessions.length} session(s)` : 'Ready');
+}
+
+// Generate session title based on command
+function generateSessionTitle(commandId, userMessage) {
+  const commandTitles = {
+    'gemini': 'Chat with Gemini',
+    'claude': 'Chat with Claude',
+    'chatgpt': 'Chat with ChatGPT',
+    'raw-terminal': 'Running Terminal Commands',
+    'api-request': 'API Request',
+    'ls': 'List Files',
+    'whoami': 'Check User',
+    'node-version': 'Check Node Version',
+    'echo-test': 'Echo Test'
+  };
+
+  // If we have a predefined title, use it
+  if (commandTitles[commandId]) {
+    return commandTitles[commandId];
+  }
+
+  // Otherwise, create a title from the command
+  if (userMessage && userMessage.length > 0) {
+    const truncated = userMessage.length > 30 ? userMessage.substring(0, 30) + '...' : userMessage;
+    return `Command: ${truncated}`;
+  }
+
+  return `Command: ${commandId}`;
 }
 
 // Save session to backend

@@ -2,24 +2,24 @@
 const API_BASE_URL = 'http://localhost:3000/api';
 
 // State
-let currentThreadId = null;
-let threads = [];
-let filteredThreads = [];
+let currentSessionId = null;
+let sessions = [];
+let filteredSessions = [];
 let availableCommands = [];
 let searchQuery = '';
 let isExecuting = false;
 let shouldCancel = false;
 
 // DOM Elements
-const threadList = document.getElementById('threadList');
+const sessionList = document.getElementById('sessionList');
 const messagesContainer = document.getElementById('messagesContainer');
-const threadTitle = document.getElementById('threadTitle');
-const threadTimestamp = document.getElementById('threadTimestamp');
+const sessionTitle = document.getElementById('sessionTitle');
+const sessionTimestamp = document.getElementById('sessionTimestamp');
 const messageInput = document.getElementById('messageInput');
 const sendBtn = document.getElementById('sendBtn');
 const clearBtn = document.getElementById('clearBtn');
 const commandSelect = document.getElementById('commandSelect');
-const newThreadBtn = document.getElementById('newThreadBtn');
+const newSessionBtn = document.getElementById('newSessionBtn');
 const restartBtn = document.getElementById('restartBtn');
 const statusText = document.getElementById('statusText');
 const apiStatus = document.getElementById('apiStatus');
@@ -35,13 +35,13 @@ const sendBtnApi = document.getElementById('sendBtnApi');
 const sendBtnDisabled = document.getElementById('sendBtnDisabled');
 const waitingState = document.getElementById('waitingState');
 const cancelBtn = document.getElementById('cancelBtn');
-const deleteThreadBtn = document.getElementById('deleteThreadBtn');
+const deleteSessionBtn = document.getElementById('deleteSessionBtn');
 
 // View elements
-const threadsView = document.getElementById('threadsView');
+const sessionsView = document.getElementById('sessionsView');
 const settingsView = document.getElementById('settingsView');
 const helpView = document.getElementById('helpView');
-const threadsSidebar = document.getElementById('threadsSidebar');
+const sessionsSidebar = document.getElementById('sessionsSidebar');
 const navItems = document.querySelectorAll('.nav-item');
 
 // Initialize app
@@ -54,8 +54,8 @@ async function init() {
   // Check API health
   await checkAPIHealth();
 
-  // Load threads
-  await loadThreads();
+  // Load sessions
+  await loadSessions();
 
   // Load available commands
   await loadCommands();
@@ -63,8 +63,8 @@ async function init() {
   // Setup event listeners
   setupEventListeners();
 
-  // Automatically create a new thread on startup
-  createNewThread();
+  // Automatically create a new session on startup
+  createNewSession();
 
   updateStatus('Ready');
 }
@@ -85,19 +85,19 @@ async function checkAPIHealth() {
   }
 }
 
-// Load threads from API
-async function loadThreads() {
+// Load sessions from API
+async function loadSessions() {
   try {
     updateStatus('Loading sessions...');
     const response = await fetch(`${API_BASE_URL}/threads`);
     const data = await response.json();
-    threads = data.threads;
-    filteredThreads = threads;
-    renderThreadList();
+    sessions = data.threads;
+    filteredSessions = sessions;
+    renderSessionList();
     updateStatus('Sessions loaded');
   } catch (error) {
-    console.error('Failed to load threads:', error);
-    threadList.innerHTML = '<div class="loading">Failed to load sessions</div>';
+    console.error('Failed to load sessions:', error);
+    sessionList.innerHTML = '<div class="loading">Failed to load sessions</div>';
     updateStatus('Error loading sessions');
   }
 }
@@ -114,38 +114,38 @@ async function loadCommands() {
   }
 }
 
-// Render thread list
-function renderThreadList() {
-  const threadsToRender = filteredThreads.length > 0 ? filteredThreads : threads;
+// Render session list
+function renderSessionList() {
+  const sessionsToRender = filteredSessions.length > 0 ? filteredSessions : sessions;
 
-  if (threadsToRender.length === 0) {
+  if (sessionsToRender.length === 0) {
     if (searchQuery) {
-      threadList.innerHTML = '<div class="loading">No sessions match your search</div>';
+      sessionList.innerHTML = '<div class="loading">No sessions match your search</div>';
     } else {
-      threadList.innerHTML = '<div class="loading">No sessions found</div>';
+      sessionList.innerHTML = '<div class="loading">No sessions found</div>';
     }
     return;
   }
 
-  threadList.innerHTML = threadsToRender.map(thread => `
-    <div class="thread-item ${thread.unread ? 'unread' : ''} ${currentThreadId === thread.id ? 'active' : ''}"
-         data-thread-id="${thread.id}">
-      <div class="thread-item-header">
-        <div class="thread-item-title">
-          ${thread.unread ? '<span class="unread-indicator"></span>' : ''}
-          ${thread.title}
+  sessionList.innerHTML = sessionsToRender.map(session => `
+    <div class="session-item ${session.unread ? 'unread' : ''} ${currentSessionId === session.id ? 'active' : ''}"
+         data-session-id="${session.id}">
+      <div class="session-item-header">
+        <div class="session-item-title">
+          ${session.unread ? '<span class="unread-indicator"></span>' : ''}
+          ${session.title}
         </div>
-        <div class="thread-item-time">${formatTime(thread.timestamp)}</div>
+        <div class="session-item-time">${formatTime(session.timestamp)}</div>
       </div>
-      <div class="thread-item-preview">${thread.preview}</div>
+      <div class="session-item-preview">${session.preview}</div>
     </div>
   `).join('');
 
   // Add click listeners
-  document.querySelectorAll('.thread-item').forEach(item => {
+  document.querySelectorAll('.session-item').forEach(item => {
     item.addEventListener('click', () => {
-      const threadId = parseInt(item.dataset.threadId);
-      selectThread(threadId);
+      const sessionId = parseInt(item.dataset.sessionId);
+      selectSession(sessionId);
     });
   });
 }
@@ -201,38 +201,38 @@ function updateInputMode(commandId) {
   }
 }
 
-// Select a thread
-async function selectThread(threadId) {
-  currentThreadId = threadId;
+// Select a session
+async function selectSession(sessionId) {
+  currentSessionId = sessionId;
 
   // Update UI
-  document.querySelectorAll('.thread-item').forEach(item => {
+  document.querySelectorAll('.session-item').forEach(item => {
     item.classList.remove('active');
-    if (parseInt(item.dataset.threadId) === threadId) {
+    if (parseInt(item.dataset.sessionId) === sessionId) {
       item.classList.add('active');
       item.classList.remove('unread');
     }
   });
 
-  // Show delete button when a thread is selected
-  deleteThreadBtn.classList.remove('hidden');
+  // Show delete button when a session is selected
+  deleteSessionBtn.classList.remove('hidden');
 
-  // Load thread details
-  await loadThreadDetails(threadId);
+  // Load session details
+  await loadSessionDetails(sessionId);
 }
 
-// Load thread details
-async function loadThreadDetails(threadId) {
+// Load session details
+async function loadSessionDetails(sessionId) {
   try {
-    updateStatus(`Loading session ${threadId}...`);
-    const response = await fetch(`${API_BASE_URL}/threads/${threadId}`);
+    updateStatus(`Loading session ${sessionId}...`);
+    const response = await fetch(`${API_BASE_URL}/threads/${sessionId}`);
 
     if (!response.ok) {
-      // Thread might be newly created and not in backend yet
-      const localThread = threads.find(t => t.id === threadId);
-      if (localThread) {
-        threadTitle.textContent = localThread.title;
-        threadTimestamp.textContent = `Started ${formatTime(localThread.timestamp)}`;
+      // Session might be newly created and not in backend yet
+      const localSession = sessions.find(t => t.id === sessionId);
+      if (localSession) {
+        sessionTitle.textContent = localSession.title;
+        sessionTimestamp.textContent = `Started ${formatTime(localSession.timestamp)}`;
         messagesContainer.innerHTML = '<div class="loading">No messages in this session yet. Start a conversation!</div>';
         updateStatus('New session ready');
         return;
@@ -240,14 +240,14 @@ async function loadThreadDetails(threadId) {
       throw new Error('Session not found');
     }
 
-    const thread = await response.json();
+    const session = await response.json();
 
-    threadTitle.textContent = thread.title;
-    threadTimestamp.textContent = `Started ${formatTime(thread.timestamp)}`;
-    renderMessages(thread.messages);
+    sessionTitle.textContent = session.title;
+    sessionTimestamp.textContent = `Started ${formatTime(session.timestamp)}`;
+    renderMessages(session.messages);
     updateStatus('Session loaded');
   } catch (error) {
-    console.error('Failed to load thread details:', error);
+    console.error('Failed to load session details:', error);
     messagesContainer.innerHTML = '<div class="loading">Failed to load session</div>';
     updateStatus('Error loading session');
   }
@@ -313,7 +313,7 @@ async function executeCommand() {
     return;
   }
 
-  if (!currentThreadId) {
+  if (!currentSessionId) {
     alert('Please select or create a session first');
     return;
   }
@@ -348,7 +348,7 @@ async function executeCommand() {
       messagesContainer.innerHTML = '';
     }
 
-    // Immediately add user message to thread
+    // Immediately add user message to session
     const userMessageTimestamp = new Date().toISOString();
 
     // Build content and raw command based on command type
@@ -392,7 +392,7 @@ async function executeCommand() {
     messagesContainer.insertAdjacentHTML('beforeend', userMessageHtml);
 
     // Save user message to backend
-    await saveMessage(currentThreadId, userMessageObj);
+    await saveMessage(currentSessionId, userMessageObj);
 
     // Add "thinking..." message
     const thinkingMessageHtml = `
@@ -477,7 +477,7 @@ async function executeCommand() {
       }
 
       // Re-save the user message with the command
-      await saveMessage(currentThreadId, userMessageObj);
+      await saveMessage(currentSessionId, userMessageObj);
     }
 
     // Check if cancelled before proceeding
@@ -529,7 +529,7 @@ async function executeCommand() {
     messagesContainer.insertAdjacentHTML('beforeend', systemMessageHtml);
 
     // Save system message to backend
-    await saveMessage(currentThreadId, systemMessageObj);
+    await saveMessage(currentSessionId, systemMessageObj);
 
     // Scroll to bottom
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
@@ -552,7 +552,7 @@ async function executeCommand() {
     }
 
     if (!shouldCancel) {
-      // Display error in thread view
+      // Display error in session view
       const errorMessageTimestamp = new Date().toISOString();
       const errorMessageObj = {
         role: 'system',
@@ -571,7 +571,7 @@ async function executeCommand() {
       messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
       // Save error message to backend
-      await saveMessage(currentThreadId, errorMessageObj);
+      await saveMessage(currentSessionId, errorMessageObj);
 
       updateStatus('Error executing command');
     }
@@ -602,50 +602,50 @@ async function sendMessage() {
   await executeCommand();
 }
 
-// Search threads
-function searchThreads(query) {
+// Search sessions
+function searchSessions(query) {
   searchQuery = query.toLowerCase().trim();
 
   if (!searchQuery) {
-    filteredThreads = threads;
+    filteredSessions = sessions;
   } else {
-    filteredThreads = threads.filter(thread => {
-      return thread.title.toLowerCase().includes(searchQuery) ||
-             thread.preview.toLowerCase().includes(searchQuery);
+    filteredSessions = sessions.filter(session => {
+      return session.title.toLowerCase().includes(searchQuery) ||
+             session.preview.toLowerCase().includes(searchQuery);
     });
   }
 
-  renderThreadList();
-  updateStatus(searchQuery ? `Found ${filteredThreads.length} session(s)` : 'Ready');
+  renderSessionList();
+  updateStatus(searchQuery ? `Found ${filteredSessions.length} session(s)` : 'Ready');
 }
 
-// Save thread to backend
-async function saveThread(thread) {
+// Save session to backend
+async function saveSession(session) {
   try {
     const response = await fetch(`${API_BASE_URL}/threads`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(thread)
+      body: JSON.stringify(session)
     });
 
     if (!response.ok) {
-      console.error('Failed to save thread:', await response.text());
+      console.error('Failed to save session:', await response.text());
       return false;
     }
 
     return true;
   } catch (error) {
-    console.error('Error saving thread:', error);
+    console.error('Error saving session:', error);
     return false;
   }
 }
 
-// Save message to thread
-async function saveMessage(threadId, message) {
+// Save message to session
+async function saveMessage(sessionId, message) {
   try {
-    const response = await fetch(`${API_BASE_URL}/threads/${threadId}/messages`, {
+    const response = await fetch(`${API_BASE_URL}/threads/${sessionId}/messages`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -665,12 +665,12 @@ async function saveMessage(threadId, message) {
   }
 }
 
-// Create new thread
-async function createNewThread() {
-  // Generate new thread ID
-  const newId = threads.length > 0 ? Math.max(...threads.map(t => t.id)) + 1 : 1;
+// Create new session
+async function createNewSession() {
+  // Generate new session ID
+  const newId = sessions.length > 0 ? Math.max(...sessions.map(t => t.id)) + 1 : 1;
 
-  const newThread = {
+  const newSession = {
     id: newId,
     title: 'New Session',
     preview: 'New session - no messages yet',
@@ -679,25 +679,25 @@ async function createNewThread() {
     messages: []
   };
 
-  // Save thread to backend
-  await saveThread(newThread);
+  // Save session to backend
+  await saveSession(newSession);
 
-  // Add to threads array at the beginning
-  threads.unshift(newThread);
+  // Add to sessions array at the beginning
+  sessions.unshift(newSession);
 
-  // Update filtered threads if search is active
+  // Update filtered sessions if search is active
   if (searchQuery) {
-    searchThreads(searchQuery);
+    searchSessions(searchQuery);
   } else {
-    filteredThreads = threads;
+    filteredSessions = sessions;
   }
 
-  // Render and select the new thread
-  renderThreadList();
+  // Render and select the new session
+  renderSessionList();
 
-  // Set up the blank thread view
-  currentThreadId = newId;
-  threadTitle.textContent = newThread.title;
+  // Set up the blank session view
+  currentSessionId = newId;
+  sessionTitle.textContent = newSession.title;
   messagesContainer.innerHTML = `
     <div class="welcome-message">
       <div class="welcome-icon">
@@ -728,9 +728,9 @@ async function createNewThread() {
   }
 
   // Update active state in UI
-  document.querySelectorAll('.thread-item').forEach(item => {
+  document.querySelectorAll('.session-item').forEach(item => {
     item.classList.remove('active');
-    if (parseInt(item.dataset.threadId) === newId) {
+    if (parseInt(item.dataset.sessionId) === newId) {
       item.classList.add('active');
     }
   });
@@ -739,21 +739,21 @@ async function createNewThread() {
   messageInput.focus();
 
   updateStatus('Created new session');
-  console.log('Created new thread:', newThread);
+  console.log('Created new session:', newSession);
 }
 
-// Delete current thread
-async function deleteCurrentThread() {
-  if (!currentThreadId) {
+// Delete current session
+async function deleteCurrentSession() {
+  if (!currentSessionId) {
     updateStatus('No session selected');
     return;
   }
 
   // Show confirmation dialog
-  const thread = threads.find(t => t.id === currentThreadId);
-  const threadName = thread ? thread.title : `Session ${currentThreadId}`;
+  const session = sessions.find(t => t.id === currentSessionId);
+  const sessionName = session ? session.title : `Session ${currentSessionId}`;
 
-  const confirmed = confirm(`Are you sure you want to delete "${threadName}"?\n\nThis action cannot be undone.`);
+  const confirmed = confirm(`Are you sure you want to delete "${sessionName}"?\n\nThis action cannot be undone.`);
 
   if (!confirmed) {
     updateStatus('Delete cancelled');
@@ -761,53 +761,53 @@ async function deleteCurrentThread() {
   }
 
   try {
-    updateStatus(`Deleting session ${currentThreadId}...`);
+    updateStatus(`Deleting session ${currentSessionId}...`);
 
-    // Find the index of the current thread before deleting
-    const threadsToSearch = filteredThreads.length > 0 ? filteredThreads : threads;
-    const currentIndex = threadsToSearch.findIndex(t => t.id === currentThreadId);
+    // Find the index of the current session before deleting
+    const sessionsToSearch = filteredSessions.length > 0 ? filteredSessions : sessions;
+    const currentIndex = sessionsToSearch.findIndex(t => t.id === currentSessionId);
 
-    const response = await fetch(`${API_BASE_URL}/threads/${currentThreadId}`, {
+    const response = await fetch(`${API_BASE_URL}/threads/${currentSessionId}`, {
       method: 'DELETE'
     });
 
     if (!response.ok) {
-      throw new Error('Failed to delete thread');
+      throw new Error('Failed to delete session');
     }
 
-    // Store the deleted thread ID
-    const deletedThreadId = currentThreadId;
+    // Store the deleted session ID
+    const deletedSessionId = currentSessionId;
 
-    // Remove from local threads array
-    threads = threads.filter(t => t.id !== currentThreadId);
+    // Remove from local sessions array
+    sessions = sessions.filter(t => t.id !== currentSessionId);
 
-    // Update filtered threads if search is active
+    // Update filtered sessions if search is active
     if (searchQuery) {
-      searchThreads(searchQuery);
+      searchSessions(searchQuery);
     } else {
-      filteredThreads = threads;
+      filteredSessions = sessions;
     }
 
-    // Render updated thread list
-    renderThreadList();
+    // Render updated session list
+    renderSessionList();
 
-    // Select the next thread (or previous if at the end)
-    const updatedThreadsToSearch = filteredThreads.length > 0 ? filteredThreads : threads;
+    // Select the next session (or previous if at the end)
+    const updatedSessionsToSearch = filteredSessions.length > 0 ? filteredSessions : sessions;
 
-    if (updatedThreadsToSearch.length > 0) {
-      // Try to select the thread at the same index (which is now the next older thread)
-      // If we deleted the last thread, select the new last thread
-      const nextIndex = Math.min(currentIndex, updatedThreadsToSearch.length - 1);
-      const nextThread = updatedThreadsToSearch[nextIndex];
+    if (updatedSessionsToSearch.length > 0) {
+      // Try to select the session at the same index (which is now the next older session)
+      // If we deleted the last session, select the new last session
+      const nextIndex = Math.min(currentIndex, updatedSessionsToSearch.length - 1);
+      const nextSession = updatedSessionsToSearch[nextIndex];
 
-      if (nextThread) {
-        await selectThread(nextThread.id);
+      if (nextSession) {
+        await selectSession(nextSession.id);
       }
     } else {
-      // No threads left
-      currentThreadId = null;
-      deleteThreadBtn.classList.add('hidden');
-      threadTitle.textContent = 'No sessions';
+      // No sessions left
+      currentSessionId = null;
+      deleteSessionBtn.classList.add('hidden');
+      sessionTitle.textContent = 'No sessions';
       messagesContainer.innerHTML = `
         <div class="welcome-message">
           <div class="welcome-icon">
@@ -824,10 +824,10 @@ async function deleteCurrentThread() {
       }
     }
 
-    updateStatus(`Session ${deletedThreadId} deleted successfully`);
-    console.log('Deleted thread:', deletedThreadId);
+    updateStatus(`Session ${deletedSessionId} deleted successfully`);
+    console.log('Deleted session:', deletedSessionId);
   } catch (error) {
-    console.error('Failed to delete thread:', error);
+    console.error('Failed to delete session:', error);
     updateStatus('Error deleting session');
     alert('Failed to delete session. Please try again.');
   }
@@ -845,24 +845,24 @@ function switchView(viewName) {
   });
 
   // Show/hide views
-  if (viewName === 'threads') {
-    threadsView.classList.remove('hidden');
+  if (viewName === 'sessions') {
+    sessionsView.classList.remove('hidden');
     settingsView.classList.add('hidden');
     helpView.classList.add('hidden');
-    threadsSidebar.classList.remove('hidden');
+    sessionsSidebar.classList.remove('hidden');
     updateStatus('Sessions view');
   } else if (viewName === 'settings') {
-    threadsView.classList.add('hidden');
+    sessionsView.classList.add('hidden');
     settingsView.classList.remove('hidden');
     helpView.classList.add('hidden');
-    threadsSidebar.classList.add('hidden');
+    sessionsSidebar.classList.add('hidden');
     updateStatus('Settings view');
     loadSettingsInfo();
   } else if (viewName === 'help') {
-    threadsView.classList.add('hidden');
+    sessionsView.classList.add('hidden');
     settingsView.classList.add('hidden');
     helpView.classList.remove('hidden');
-    threadsSidebar.classList.add('hidden');
+    sessionsSidebar.classList.add('hidden');
     updateStatus('Help & About');
   }
 }
@@ -966,7 +966,7 @@ function setupEventListeners() {
     });
   });
 
-  // Thread view controls
+  // Session view controls
   sendBtn.addEventListener('click', sendMessage);
   sendBtnApi.addEventListener('click', sendMessage);
   sendBtnDisabled.addEventListener('click', sendMessage);
@@ -1016,11 +1016,11 @@ function setupEventListeners() {
     }
   });
 
-  // New thread button
-  newThreadBtn.addEventListener('click', createNewThread);
+  // New session button
+  newSessionBtn.addEventListener('click', createNewSession);
 
-  // Delete thread button
-  deleteThreadBtn.addEventListener('click', deleteCurrentThread);
+  // Delete session button
+  deleteSessionBtn.addEventListener('click', deleteCurrentSession);
 
   // Theme select change handler
   const themeSelect = document.getElementById('themeSelect');
@@ -1033,14 +1033,14 @@ function setupEventListeners() {
 
   // Search input
   searchInput.addEventListener('input', (e) => {
-    searchThreads(e.target.value);
+    searchSessions(e.target.value);
   });
 
   // Clear search on Escape key
   searchInput.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       searchInput.value = '';
-      searchThreads('');
+      searchSessions('');
     }
   });
 

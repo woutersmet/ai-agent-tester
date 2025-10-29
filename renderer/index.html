@@ -18,7 +18,7 @@
         </div>
       </div>
       <div class="nav-items">
-        <div class="nav-item active" data-view="threads">
+        <div class="nav-item active" data-view="sessions">
           <i data-lucide="message-square" class="nav-icon"></i>
           <span class="nav-label">Sessions</span>
         </div>
@@ -45,31 +45,31 @@
       </div>
     </nav>
 
-    <!-- Sidebar with thread list -->
-    <aside class="sidebar" id="threadsSidebar">
+    <!-- Sidebar with session list -->
+    <aside class="sidebar" id="sessionsSidebar">
       <div class="search-box">
         <input type="text" placeholder="Search sessions..." id="searchInput">
       </div>
 
-      <div class="new-thread-container">
-        <button class="new-thread-btn" id="newThreadBtn">+ New Session</button>
+      <div class="new-session-container">
+        <button class="new-session-btn" id="newSessionBtn">+ New Session</button>
       </div>
 
-      <div class="thread-list" id="threadList">
-        <!-- Threads will be loaded here dynamically -->
+      <div class="session-list" id="sessionList">
+        <!-- Sessions will be loaded here dynamically -->
         <div class="loading">Loading sessions...</div>
       </div>
     </aside>
 
     <!-- Main content area for Sessions -->
-    <main class="main-content" id="threadsView">
-      <div class="thread-header" id="threadHeader">
-        <div class="thread-header-content">
-          <h2 class="thread-title" id="threadTitle">Select a session</h2>
-          <div class="thread-timestamp" id="threadTimestamp"></div>
+    <main class="main-content" id="sessionsView">
+      <div class="session-header" id="sessionHeader">
+        <div class="session-header-content">
+          <h2 class="session-title" id="sessionTitle">Select a session</h2>
+          <div class="session-timestamp" id="sessionTimestamp"></div>
         </div>
-        <div class="thread-actions">
-          <button class="delete-thread-btn hidden" id="deleteThreadBtn" title="Delete session">
+        <div class="session-actions">
+          <button class="delete-session-btn hidden" id="deleteSessionBtn" title="Delete session">
             <i data-lucide="trash-2" class="btn-icon"></i>
             <span class="btn-label">Discard</span>
           </button>
@@ -243,7 +243,7 @@
           <h3 class="section-title">About AI Agent Tester</h3>
           <p class="help-text">
             AI Agent Tester is a desktop application for Mac, designed to make it easier to run and test AI agent interactions.
-            This tool provides a convenient interface for executing commands, viewing agent responses, and managing test threads.
+            This tool provides a convenient interface for executing commands, viewing agent responses, and managing test sessions.
           </p>
         </div>
 

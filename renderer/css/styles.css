@@ -179,13 +179,13 @@ body {
   -webkit-app-region: no-drag;
 }
 
-.new-thread-container {
+.new-session-container {
   padding: 12px 16px;
   border-bottom: 1px solid #d1d1d6;
   -webkit-app-region: no-drag;
 }
 
-.new-thread-btn {
+.new-session-btn {
   width: 100%;
   padding: 8px 12px;
   background: linear-gradient(180deg, #f9f9fb 0%, #e8e8ed 100%);
@@ -199,12 +199,12 @@ body {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
-.new-thread-btn:hover {
+.new-session-btn:hover {
   background: linear-gradient(180deg, #ffffff 0%, #f0f0f5 100%);
   border-color: #b0b0b5;
 }
 
-.new-thread-btn:active {
+.new-session-btn:active {
   background: linear-gradient(180deg, #e8e8ed 0%, #d8d8dd 100%);
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
 }
@@ -225,51 +225,51 @@ body {
   box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
 }
 
-.thread-list {
+.session-list {
   flex: 1;
   overflow-y: auto;
   -webkit-app-region: no-drag;
 }
 
-.thread-item {
+.session-item {
   padding: 16px;
   border-bottom: 1px solid #e5e5ea;
   cursor: pointer;
   transition: background-color 0.2s;
 }
 
-.thread-item:hover {
+.session-item:hover {
   background-color: #ebebed;
 }
 
-.thread-item.active {
+.session-item.active {
   background-color: #e3e3e5;
   border-left: 3px solid #007aff;
 }
 
-.thread-item.unread {
+.session-item.unread {
   background-color: #f9f9fb;
 }
 
-.thread-item-header {
+.session-item-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 6px;
 }
 
-.thread-item-title {
+.session-item-title {
   font-size: 14px;
   font-weight: 600;
   color: #1d1d1f;
 }
 
-.thread-item-time {
+.session-item-time {
   font-size: 11px;
   color: #86868b;
 }
 
-.thread-item-preview {
+.session-item-preview {
   font-size: 13px;
   color: #6e6e73;
   overflow: hidden;
@@ -300,7 +300,7 @@ body {
   display: none !important;
 }
 
-.thread-header {
+.session-header {
   padding: 16px 24px;
   border-bottom: 1px solid #d1d1d6;
   display: flex;
@@ -310,25 +310,25 @@ body {
   -webkit-app-region: drag;
 }
 
-.thread-header-content {
+.session-header-content {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.thread-title {
+.session-title {
   font-size: 16px;
   font-weight: 600;
   color: #1d1d1f;
 }
 
-.thread-timestamp {
+.session-timestamp {
   font-size: 11px;
   color: #86868b;
   font-weight: 400;
 }
 
-.thread-actions {
+.session-actions {
   display: flex;
   gap: 8px;
   -webkit-app-region: no-drag;
@@ -349,7 +349,7 @@ body {
   border-color: #007aff;
 }
 
-.delete-thread-btn {
+.delete-session-btn {
   padding: 6px 10px;
   background: transparent;
   border: 1px solid transparent;
@@ -364,24 +364,24 @@ body {
   font-weight: 500;
 }
 
-.delete-thread-btn:hover {
+.delete-session-btn:hover {
   background: linear-gradient(180deg, #ffebea 0%, #ffd5d3 100%);
   border-color: #ff3b30;
   color: #ff3b30;
 }
 
-.delete-thread-btn:active {
+.delete-session-btn:active {
   background: linear-gradient(180deg, #ffd5d3 0%, #ffc5c3 100%);
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-.delete-thread-btn .btn-icon {
+.delete-session-btn .btn-icon {
   width: 14px;
   height: 14px;
   stroke: currentColor;
 }
 
-.delete-thread-btn .btn-label {
+.delete-session-btn .btn-label {
   font-size: 13px;
 }
 
@@ -1238,7 +1238,7 @@ body.dark-theme .sidebar {
   border-right-color: #3c3c43;
 }
 
-body.dark-theme .threads-sidebar {
+body.dark-theme .sessions-sidebar {
   background-color: #252525;
   border-right-color: #3c3c43;
 }
@@ -1252,45 +1252,45 @@ body.dark-theme .sidebar-title {
   color: #e5e5e7;
 }
 
-body.dark-theme .thread-item {
+body.dark-theme .session-item {
   background-color: #2d2d2d;
   border-color: #3c3c43;
   color: #e5e5e7;
 }
 
-body.dark-theme .thread-item:hover {
+body.dark-theme .session-item:hover {
   background-color: #3c3c43;
 }
 
-body.dark-theme .thread-item.active {
+body.dark-theme .session-item.active {
   background-color: #007aff;
   border-color: #007aff;
 }
 
-body.dark-theme .thread-item-title {
+body.dark-theme .session-item-title {
   color: #e5e5e7;
 }
 
-body.dark-theme .thread-title {
+body.dark-theme .session-title {
   color: #e5e5e7;
 }
 
-body.dark-theme .thread-preview {
+body.dark-theme .session-preview {
   color: #86868b;
 }
 
-body.dark-theme .threads-view,
+body.dark-theme .sessions-view,
 body.dark-theme .settings-view,
 body.dark-theme .help-view {
   background-color: #1e1e1e;
 }
 
-body.dark-theme .thread-header {
+body.dark-theme .session-header {
   background-color: #252525;
   border-bottom-color: #3c3c43;
 }
 
-body.dark-theme .thread-title-text {
+body.dark-theme .session-title-text {
   color: #e5e5e7;
 }
 
@@ -1471,23 +1471,23 @@ body.dark-theme .search-box input:focus {
   box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
 }
 
-body.dark-theme .new-thread-container {
+body.dark-theme .new-session-container {
   background-color: #252525;
   border-bottom-color: #3c3c43;
 }
 
-body.dark-theme .new-thread-btn {
+body.dark-theme .new-session-btn {
   background: linear-gradient(180deg, #3c3c43 0%, #2d2d2d 100%);
   color: #e5e5e7;
   border-color: #4c4c4f;
 }
 
-body.dark-theme .new-thread-btn:hover {
+body.dark-theme .new-session-btn:hover {
   background: linear-gradient(180deg, #4c4c4f 0%, #3c3c43 100%);
   border-color: #5c5c5f;
 }
 
-body.dark-theme .new-thread-btn:active {
+body.dark-theme .new-session-btn:active {
   background: linear-gradient(180deg, #2d2d2d 0%, #252525 100%);
 }
 
@@ -1565,14 +1565,14 @@ body.dark-theme .cancel-btn:hover {
   border-color: #4c4c4f;
 }
 
-/* Dark theme for delete thread button */
-body.dark-theme .delete-thread-btn {
+/* Dark theme for delete session button */
+body.dark-theme .delete-session-btn {
   background-color: #2d2d2d;
   border-color: #3c3c43;
   color: #e5e5e7;
 }
 
-body.dark-theme .delete-thread-btn:hover {
+body.dark-theme .delete-session-btn:hover {
   background-color: #3c3c43;
   border-color: #ff3b30;
   color: #ff3b30;

@@ -1,7 +1,9 @@
 const fs = require('fs').promises;
 const path = require('path');
 
-const THREADS_DIR = path.join(__dirname, '..', 'ai-agent-runner-sessions-history');
+// Use environment variable for user data path, fallback to current directory for development
+const USER_DATA_PATH = process.env.USER_DATA_PATH || path.join(__dirname, '..');
+const THREADS_DIR = path.join(USER_DATA_PATH, 'ai-agent-runner-sessions-history');
 
 // Starter thread data (same as current hardcoded data)
 const STARTER_THREADS = [

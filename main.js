@@ -2,11 +2,17 @@ const { app, BrowserWindow, ipcMain, nativeImage, Menu } = require('electron');
 const path = require('path');
 const expressApp = require('./server/app');
 
+// Detect if running in development mode (must be done early, before app is ready)
+const isDev = !app.isPackaged || process.argv.includes('--dev');
+const appTitle = isDev ? 'AI Agent Tester (Dev)' : 'AI Agent Tester';
+
+// Override the app name BEFORE app is ready (critical for macOS menu bar)
+app.name = appTitle;
+
 // Set app name for macOS - must be done before app is ready
 if (process.platform === 'darwin') {
-  app.name = 'AI Agent Tester';
-  // Also set the About panel name
-  app.setName('AI Agent Tester');
+  // Force set the name multiple times to ensure it sticks
+  app.setName(appTitle);
 }
 
 // Set dock icon for macOS
@@ -26,7 +32,7 @@ function createWindow() {
     height: 900,
     minWidth: 1000,
     minHeight: 600,
-    title: 'AI Agent Tester',
+    title: appTitle,
     titleBarStyle: 'hiddenInset', // macOS style
     backgroundColor: '#1e1e1e',
     icon: path.join(__dirname, 'ai_agent_tester_icon_2.png'),
@@ -40,7 +46,7 @@ function createWindow() {
   mainWindow.loadFile('renderer/index.html');
 
   // Open DevTools in development mode
-  if (process.argv.includes('--dev')) {
+  if (isDev) {
     mainWindow.webContents.openDevTools();
   }
 
@@ -71,17 +77,17 @@ function startExpressServer() {
 function createMenu() {
   const template = [
     {
-      label: 'AI Agent Tester',
+      label: appTitle,
       submenu: [
-        { role: 'about', label: 'About AI Agent Tester' },
+        { role: 'about', label: `About ${appTitle}` },
         { type: 'separator' },
         { role: 'services' },
         { type: 'separator' },
-        { role: 'hide', label: 'Hide AI Agent Tester' },
+        { role: 'hide', label: `Hide ${appTitle}` },
         { role: 'hideOthers' },
         { role: 'unhide' },
         { type: 'separator' },
-        { role: 'quit', label: 'Quit AI Agent Tester' }
+        { role: 'quit', label: `Quit ${appTitle}` }
       ]
     },
     {
@@ -136,6 +142,20 @@ function createMenu() {
 // App lifecycle
 app.whenReady().then(async () => {
   try {
+    // Force set app name again when ready (ensures it's applied)
+    if (process.platform === 'darwin') {
+      app.setName(appTitle);
+      app.dock.setBadge(''); // Refresh dock
+    }
+
+    // Log app mode
+    console.log(`🚀 Starting ${appTitle}${isDev ? ' in DEVELOPMENT mode' : ''}`);
+
+    // Set user data path for session storage
+    const userDataPath = app.getPath('userData');
+    process.env.USER_DATA_PATH = userDataPath;
+    console.log(`📁 User data path: ${userDataPath}`);
+
     await startExpressServer();
     createMenu();
     createWindow();

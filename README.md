@@ -6,7 +6,6 @@ An Electron-based desktop application for macOS that provides an inbox-style int
 
 - **Inbox-Style Interface**: Gmail-like layout with session list and message view
 - **Command Execution**: Safely execute whitelisted shell commands
-- **Express Backend**: RESTful API for command execution and session management
 - **Modern UI**: Dark theme with macOS-native styling
 - **Real-time Updates**: Live status indicators and command output
 - **Security First**: Whitelisted commands to prevent arbitrary code execution
@@ -66,24 +65,6 @@ The application will:
 2. Launch the Electron window
 3. Load the inbox interface
 
-## 📁 Project Structure
-
-```
-ai-agent-tester-app-mac/
-├── main.js                 # Electron main process
-├── preload.js             # Preload script for security
-├── package.json           # Project dependencies and scripts
-├── server/
-│   └── app.js            # Express server with API endpoints
-├── renderer/
-│   ├── index.html        # Main UI layout
-│   ├── css/
-│   │   └── styles.css    # Application styles
-│   └── js/
-│       └── app.js        # Frontend JavaScript logic
-└── README.md             # This file
-```
-
 ## 🔧 How It Works
 
 ### Architecture
@@ -112,19 +93,6 @@ ai-agent-tester-app-mac/
 - `POST /api/execute` - Execute a whitelisted command
 - `POST /api/execute-custom` - Execute custom command (use with caution)
 
-### Available Commands
-
-The app comes with these pre-configured safe commands:
-
-- `ls` - List directory contents
-- `pwd` - Print working directory
-- `date` - Show current date/time
-- `whoami` - Show current user
-- `node-version` - Check Node.js version
-- `npm-version` - Check npm version
-- `git-status` - Show git status
-- `echo-test` - Test echo command
-
 ## 🎨 Using the Application
 
 ### Viewing Sessions
@@ -144,33 +112,6 @@ The app comes with these pre-configured safe commands:
 
 - `Cmd/Ctrl + Enter` - Send message
 - Standard macOS shortcuts work (Cmd+C, Cmd+V, etc.)
-
-## 🔒 Security Considerations
-
-### Command Whitelisting
-
-By default, only pre-approved commands can be executed. To add new commands, edit `server/app.js`:
-
-```javascript
-const ALLOWED_COMMANDS = {
-  'your-command': { cmd: 'command', args: ['arg1', 'arg2'] }
-};
-```
-
-### Custom Command Execution
-
-The `/api/execute-custom` endpoint allows arbitrary commands but should be used with extreme caution:
-
-```javascript
-// Example: Execute custom command
-fetch('http://localhost:3000/api/execute-custom', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ command: 'echo "Hello World"' })
-});
-```
-
-⚠️ **Warning**: Never expose this endpoint to untrusted users!
 
 ## 🛠️ Development
 

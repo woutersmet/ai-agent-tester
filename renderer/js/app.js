@@ -320,7 +320,14 @@ function renderMessages(messages) {
     let commandHtml = '';
     // Show command for user messages if available
     if (msg.role === 'user' && msg.command) {
-      commandHtml = `<div class="message-command">$ ${escapeHtml(msg.command)}</div>`;
+      commandHtml = `
+        <div class="message-command-wrapper">
+          <div class="message-command">$ ${escapeHtml(msg.command)}</div>
+          <button class="copy-command-btn" data-command="${escapeHtml(msg.command)}" title="Copy command">
+            <i data-lucide="copy" class="copy-icon"></i>
+          </button>
+        </div>
+      `;
     }
 
     return `
@@ -332,6 +339,9 @@ function renderMessages(messages) {
       </div>
     `;
   }).join('');
+
+  // Initialize lucide icons for the newly rendered messages
+  lucide.createIcons();
 
   // Scroll to bottom
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
@@ -451,15 +461,27 @@ async function executeCommand() {
       commandId: commandId  // Store command ID for display
     };
 
+    const commandHtml = rawCommand ? `
+      <div class="message-command-wrapper">
+        <div class="message-command">$ ${escapeHtml(rawCommand)}</div>
+        <button class="copy-command-btn" data-command="${escapeHtml(rawCommand)}" title="Copy command">
+          <i data-lucide="copy" class="copy-icon"></i>
+        </button>
+      </div>
+    ` : '';
+
     const userMessageHtml = `
       <div class="message user">
         <div class="message-role">user</div>
         <div class="message-content">${escapeHtml(userMessageObj.content)}</div>
-        ${rawCommand ? `<div class="message-command">$ ${escapeHtml(rawCommand)}</div>` : ''}
+        ${commandHtml}
         <div class="message-time">${formatTime(userMessageTimestamp)}</div>
       </div>
     `;
     messagesContainer.insertAdjacentHTML('beforeend', userMessageHtml);
+
+    // Initialize lucide icons for the newly added message
+    lucide.createIcons();
 
     // Save user message to backend
     const userMessageSaved = await saveMessage(currentSessionId, userMessageObj);
@@ -1101,6 +1123,15 @@ function setupEventListeners() {
     commandSelect.value = '';
     updateInputMode('');
     updateStatus('Cleared input');
+  });
+
+  // Copy command button - use event delegation since buttons are dynamically added
+  messagesContainer.addEventListener('click', (e) => {
+    const copyBtn = e.target.closest('.copy-command-btn');
+    if (copyBtn) {
+      const command = copyBtn.dataset.command;
+      copyToClipboard(command, copyBtn);
+    }
   });
 
   // Cancel button

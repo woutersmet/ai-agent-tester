@@ -227,6 +227,217 @@ const PORT = 3000; // Change to another port like 3001
 2. Verify the command exists in `ALLOWED_COMMANDS`
 3. Check file permissions if accessing files
 
+## 🎯 Famous Quotes MCP Server
+
+This project includes a sample **Model Context Protocol (MCP)** server that provides access to famous quotes. This is a great example of how to create a simple MCP server in a single Node.js file.
+
+### What is MCP?
+
+Model Context Protocol (MCP) is a standard protocol that allows AI assistants (like Claude, Gemini, etc.) to interact with external tools and data sources. The MCP server exposes tools that the AI can call to retrieve information.
+
+### Features
+
+The Famous Quotes MCP server provides four tools:
+
+1. **search_quotes** - Search quotes by keyword or author
+2. **list_all_quotes** - List all 20 famous quotes in the database
+3. **get_random_quote** - Get a random quote
+4. **list_authors** - List all unique authors
+
+### Running the MCP Server
+
+#### Prerequisites
+
+First, install the MCP SDK:
+
+```bash
+npm install @modelcontextprotocol/sdk
+```
+
+#### Running Standalone
+
+You can test the server directly:
+
+```bash
+node famous-quotes-mcp-server.js
+```
+
+The server communicates via stdio (standard input/output), so it will wait for JSON-RPC messages. You'll see console logs when tools are called.
+
+### Adding to Google Gemini Desktop App
+
+To use this MCP server with the Google Gemini desktop app, you need to add it to your MCP settings configuration.
+
+#### Step 1: Locate Your MCP Settings File
+
+The Gemini desktop app stores MCP server configurations in:
+
+```
+~/Library/Application Support/Google/Gemini Desktop/mcp_settings.json
+```
+
+If this file doesn't exist, create it.
+
+#### Step 2: Add the Server Configuration
+
+Edit `mcp_settings.json` and add the Famous Quotes server:
+
+```json
+{
+  "mcpServers": {
+    "famous-quotes": {
+      "command": "node",
+      "args": [
+        "/Users/wouter.smet/Projects/ai-agent-tester/famous-quotes-mcp-server.js"
+      ],
+      "env": {}
+    }
+  }
+}
+```
+
+**Important**: Replace `/Users/wouter.smet/Projects/ai-agent-tester/` with the actual absolute path to your project directory.
+
+#### Step 3: Restart Gemini Desktop App
+
+1. Quit the Gemini Desktop app completely
+2. Relaunch it
+3. The MCP server should now be available
+
+#### Step 4: Test It
+
+In the Gemini chat, try asking:
+
+- "Can you search for quotes about love?"
+- "Show me quotes by Steve Jobs"
+- "Give me a random quote"
+- "List all authors in the quotes database"
+
+Gemini will automatically call the appropriate MCP tools to retrieve the information.
+
+### Viewing Server Logs
+
+The MCP server logs all tool calls to stderr. To see these logs:
+
+1. Check the Gemini Desktop app's console/logs
+2. Or run the server standalone and pipe input to it for testing
+
+Example log output:
+```
+[MCP Server] Famous Quotes MCP server running on stdio
+[MCP Server] Tool called: search_quotes
+[MCP Server] Arguments: {
+  "keyword": "love"
+}
+[MCP Server] Response: {
+  "content": [
+    {
+      "type": "text",
+      "text": "Found 1 quote(s):\n\n1. \"In this life we cannot do great things. We can only do small things with great love.\"\n   — Mother Teresa"
+    }
+  ]
+}
+```
+
+### Testing the Server Manually
+
+You can test the MCP server directly by sending JSON-RPC requests to it. The server communicates via stdio (standard input/output).
+
+#### Running the Test Script
+
+We've included a test script that demonstrates all the server's capabilities:
+
+```bash
+node test-mcp-server.js
+```
+
+This will run through all available tools and show you the responses.
+
+#### Manual Testing with JSON-RPC
+
+You can also send requests manually. Start the server:
+
+```bash
+node famous-quotes-mcp-server.js
+```
+
+Then send JSON-RPC requests via stdin. Here are some examples:
+
+**1. List Available Tools:**
+```json
+{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}
+```
+
+**2. Get a Random Quote:**
+```json
+{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"get_random_quote","arguments":{}}}
+```
+
+**3. Search Quotes by Keyword:**
+```json
+{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"search_quotes","arguments":{"keyword":"love"}}}
+```
+
+**4. Search Quotes by Author:**
+```json
+{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"search_quotes","arguments":{"author":"Steve Jobs"}}}
+```
+
+**5. Search by Both Keyword and Author:**
+```json
+{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"search_quotes","arguments":{"keyword":"great","author":"Steve Jobs"}}}
+```
+
+**6. List All Quotes:**
+```json
+{"jsonrpc":"2.0","id":6,"method":"tools/call","params":{"name":"list_all_quotes","arguments":{}}}
+```
+
+**7. List All Authors:**
+```json
+{"jsonrpc":"2.0","id":7,"method":"tools/call","params":{"name":"list_authors","arguments":{}}}
+```
+
+#### Example Response Format
+
+All tool calls return responses in this format:
+
+```json
+{
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "\"The only way to do great work is to love what you do.\"\n— Steve Jobs"
+      }
+    ]
+  },
+  "jsonrpc": "2.0",
+  "id": 2
+}
+```
+
+#### Using Echo for Quick Testing
+
+You can use `echo` to send a single request:
+
+```bash
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"get_random_quote","arguments":{}}}' | node famous-quotes-mcp-server.js
+```
+
+This will output the server logs to stderr and the JSON response to stdout.
+
+### Customizing the Server
+
+The quotes are hardcoded in the `QUOTES` array in `famous-quotes-mcp-server.js`. You can:
+
+- Add more quotes
+- Add new tools (e.g., filter by category, date, etc.)
+- Connect to a real database
+- Add more sophisticated search capabilities
+
+This is a great starting point for learning how to build MCP servers!
+
 ## 📝 TODO / Future Enhancements
 
 - [ ] Implement actual message sending functionality

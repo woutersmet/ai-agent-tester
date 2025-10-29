@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Agent Tester</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Navigation Sidebar -->
+    <nav class="nav-sidebar">
+      <div class="nav-header">
+        <div class="nav-app-title">
+          <i data-lucide="bot" class="nav-app-icon"></i>
+          <span>AI Agent Tester</span>
+        </div>
+      </div>
+      <div class="nav-items">
+        <div class="nav-item active" data-view="threads">
+          <i data-lucide="message-square" class="nav-icon"></i>
+          <span class="nav-label">Sessions</span>
+        </div>
+      </div>
+
+      <div class="nav-items nav-items-secondary">
+        <div class="nav-item" data-view="help">
+          <i data-lucide="help-circle" class="nav-icon"></i>
+          <span class="nav-label">Help</span>
+        </div>
+        <div class="nav-item" data-view="settings">
+          <i data-lucide="settings" class="nav-icon"></i>
+          <span class="nav-label">Settings</span>
+        </div>
+      </div>
+
+      <div class="nav-spacer"></div>
+
+      <div class="nav-restart">
+        <button class="nav-restart-btn" id="restartBtn" title="Restart app to see changes">
+          <i data-lucide="refresh-cw" class="nav-restart-icon"></i>
+          <span class="nav-restart-label">Restart App</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Sidebar with thread list -->
+    <aside class="sidebar" id="threadsSidebar">
+      <div class="search-box">
+        <input type="text" placeholder="Search sessions..." id="searchInput">
+      </div>
+
+      <div class="new-thread-container">
+        <button class="new-thread-btn" id="newThreadBtn">+ New Session</button>
+      </div>
+
+      <div class="thread-list" id="threadList">
+        <!-- Threads will be loaded here dynamically -->
+        <div class="loading">Loading sessions...</div>
+      </div>
+    </aside>
+
+    <!-- Main content area for Sessions -->
+    <main class="main-content" id="threadsView">
+      <div class="thread-header" id="threadHeader">
+        <h2 class="thread-title" id="threadTitle">Select a session</h2>
+        <div class="thread-actions">
+          <button class="delete-thread-btn hidden" id="deleteThreadBtn" title="Delete session">
+            <i data-lucide="trash-2" class="btn-icon"></i>
+            <span class="btn-label">Discard</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="messages-container" id="messagesContainer">
+        <div class="welcome-message">
+          <div class="welcome-icon">
+            <i data-lucide="rocket" class="welcome-icon-svg"></i>
+          </div>
+          <h2>Welcome to AI Agent Tester</h2>
+          <p>Start typing a message below to begin the conversation.</p>
+          <div class="feature-list">
+            <div class="feature-item">
+              <i data-lucide="message-square" class="feature-icon"></i>
+              <span>View conversation sessions</span>
+            </div>
+            <div class="feature-item">
+              <i data-lucide="zap" class="feature-icon"></i>
+              <span>Execute commands safely</span>
+            </div>
+            <div class="feature-item">
+              <i data-lucide="search" class="feature-icon"></i>
+              <span>Test AI agent responses</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="input-area" id="inputArea">
+        <div class="command-toolbar">
+          <button class="toolbar-btn" id="clearBtn" title="Clear">
+            <i data-lucide="trash-2" class="btn-icon"></i>
+            <span>Clear</span>
+          </button>
+          <select class="command-select" id="commandSelect">
+            <option value="">Select a command...</option>
+          </select>
+        </div>
+        <div class="input-wrapper" id="inputWrapper">
+          <textarea
+            class="message-input"
+            id="messageInput"
+            placeholder="Type a message or command..."
+            rows="3"
+          ></textarea>
+          <button class="send-btn" id="sendBtn">Send</button>
+        </div>
+        <div class="waiting-state hidden" id="waitingState">
+          <div class="spinner"></div>
+          <span class="waiting-text">Waiting for response...</span>
+          <button class="cancel-btn" id="cancelBtn">Cancel</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Settings View -->
+    <main class="settings-view hidden" id="settingsView">
+      <div class="settings-header">
+        <h2 class="settings-title">
+          <i data-lucide="settings" class="header-icon"></i>
+          <span>Settings</span>
+        </h2>
+        <p class="settings-disclaimer">
+          <i data-lucide="alert-circle" class="disclaimer-icon"></i>
+          <span>Note: This is currently a static mockup. Settings do not take effect yet.</span>
+        </p>
+      </div>
+
+      <div class="settings-container">
+        <div class="settings-section">
+          <h3 class="section-title">General</h3>
+          <div class="setting-item">
+            <label class="setting-label">
+              <span>Application Name</span>
+              <input type="text" class="setting-input" value="AI Agent Tester" readonly>
+            </label>
+          </div>
+          <div class="setting-item">
+            <label class="setting-label">
+              <span>Theme</span>
+              <select class="setting-select">
+                <option value="light" selected>Light</option>
+                <option value="dark">Dark</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h3 class="section-title">API Configuration</h3>
+          <div class="setting-item">
+            <label class="setting-label">
+              <span>API Base URL</span>
+              <input type="text" class="setting-input" value="http://localhost:3000/api" readonly>
+            </label>
+          </div>
+          <div class="setting-item">
+            <label class="setting-label">
+              <span>API Status</span>
+              <div class="api-status-display">
+                <span class="status-dot"></span>
+                <span id="settingsApiStatus">Connected</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h3 class="section-title">Command Execution</h3>
+          <div class="setting-item">
+            <label class="setting-checkbox">
+              <input type="checkbox" checked>
+              <span>Enable command execution</span>
+            </label>
+          </div>
+          <div class="setting-item">
+            <label class="setting-checkbox">
+              <input type="checkbox" checked>
+              <span>Show command output in real-time</span>
+            </label>
+          </div>
+          <div class="setting-item">
+            <label class="setting-checkbox">
+              <input type="checkbox">
+              <span>Allow custom commands (⚠️ Use with caution)</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h3 class="section-title">About</h3>
+          <div class="about-info">
+            <p><strong>Version:</strong> 1.0.0</p>
+            <p><strong>Electron:</strong> <span id="electronVersion">Loading...</span></p>
+            <p><strong>Node.js:</strong> <span id="nodeVersion">Loading...</span></p>
+            <p><strong>Platform:</strong> macOS</p>
+          </div>
+        </div>
+
+        <div class="settings-actions">
+          <button class="settings-btn primary">Save Settings</button>
+          <button class="settings-btn">Reset to Defaults</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Help View -->
+    <main class="help-view hidden" id="helpView">
+      <div class="help-header">
+        <h2 class="help-title">
+          <i data-lucide="help-circle" class="header-icon"></i>
+          <span>Help & About</span>
+        </h2>
+      </div>
+
+      <div class="help-container">
+        <div class="help-section">
+          <div class="help-icon">
+            <i data-lucide="bot" class="help-icon-svg"></i>
+          </div>
+          <h3 class="section-title">About AI Agent Tester</h3>
+          <p class="help-text">
+            AI Agent Tester is an internal Showpad application designed to make it easier to run and test AI agent interactions.
+            This tool provides a convenient interface for executing commands, viewing agent responses, and managing test threads.
+          </p>
+        </div>
+
+        <div class="help-section">
+          <div class="help-icon">
+            <i data-lucide="alert-triangle" class="help-icon-svg"></i>
+          </div>
+          <h3 class="section-title">Experimental Status</h3>
+          <p class="help-text">
+            <strong>Please note:</strong> This application is still in a <strong>highly experimental state</strong>.
+            Features may change, and you might encounter bugs or unexpected behavior. Use with caution in production environments.
+          </p>
+        </div>
+
+        <div class="help-section">
+          <div class="help-icon">
+            <i data-lucide="user" class="help-icon-svg"></i>
+          </div>
+          <h3 class="section-title">Developer & Feedback</h3>
+          <p class="help-text">
+            Built by <strong>Wouter S.</strong> at Showpad.
+          </p>
+          <p class="help-text">
+            Have feedback, suggestions, or found a bug? Feel free to reach out to Wouter directly.
+            Your input helps make this tool better for everyone!
+          </p>
+        </div>
+
+        <div class="help-section">
+          <div class="help-icon">
+            <i data-lucide="lightbulb" class="help-icon-svg"></i>
+          </div>
+          <h3 class="section-title">Getting Started</h3>
+          <ul class="help-list">
+            <li>Select a session from the sidebar to view conversations</li>
+            <li>Use the command dropdown to execute predefined commands</li>
+            <li>Type custom messages in the input area</li>
+            <li>Check the Settings page for configuration options (coming soon)</li>
+          </ul>
+        </div>
+
+        <div class="help-section">
+          <div class="help-icon">
+            <i data-lucide="book-open" class="help-icon-svg"></i>
+          </div>
+          <h3 class="section-title">Technical Details</h3>
+          <p class="help-text">
+            <strong>Architecture:</strong> Electron + Express.js<br>
+            <strong>Platform:</strong> macOS<br>
+            <strong>Version:</strong> 1.1.0 (Experimental)
+          </p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Status bar -->
+  <div class="status-bar">
+    <span class="status-item" id="statusText">Ready</span>
+    <span class="status-item" id="apiStatus">API: <span class="status-indicator">●</span></span>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+  </script>
+</body>
+</html>
+

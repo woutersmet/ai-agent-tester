@@ -1013,6 +1013,55 @@ body {
   background-color: #0051d5;
 }
 
+/* Gemini Settings Styles */
+.gemini-settings-json {
+  padding: 16px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e5e5ea;
+  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  font-size: 13px;
+  color: #1d1d1f;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.gemini-not-found {
+  padding: 16px;
+  background-color: #fff8e6;
+  border-radius: 8px;
+  border: 1px solid #ff9500;
+  border-left: 3px solid #ff9500;
+}
+
+.gemini-not-found p {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: #1d1d1f;
+}
+
+.gemini-not-found p:last-child {
+  margin-bottom: 0;
+}
+
+.gemini-not-found a {
+  color: #007aff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.gemini-not-found a:hover {
+  text-decoration: underline;
+}
+
+.loading-text {
+  padding: 16px;
+  text-align: center;
+  color: #86868b;
+  font-size: 14px;
+}
+
 /* Status Bar */
 .status-bar {
   height: 24px;
@@ -1139,5 +1188,231 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #b0b0b5;
+}
+
+/* Dark Theme Styles */
+body.dark-theme {
+  background-color: #1e1e1e;
+  color: #e5e5e7;
+}
+
+body.dark-theme .app-container {
+  background-color: #1e1e1e;
+}
+
+body.dark-theme .navbar {
+  background-color: #2d2d2d;
+  border-right-color: #3c3c43;
+}
+
+body.dark-theme .nav-item {
+  color: #e5e5e7;
+}
+
+body.dark-theme .nav-item:hover {
+  background-color: #3c3c43;
+}
+
+body.dark-theme .nav-item.active {
+  background-color: #007aff;
+}
+
+body.dark-theme .threads-sidebar {
+  background-color: #252525;
+  border-right-color: #3c3c43;
+}
+
+body.dark-theme .sidebar-header {
+  background-color: #2d2d2d;
+  border-bottom-color: #3c3c43;
+}
+
+body.dark-theme .sidebar-title {
+  color: #e5e5e7;
+}
+
+body.dark-theme .thread-item {
+  background-color: #2d2d2d;
+  border-color: #3c3c43;
+  color: #e5e5e7;
+}
+
+body.dark-theme .thread-item:hover {
+  background-color: #3c3c43;
+}
+
+body.dark-theme .thread-item.active {
+  background-color: #007aff;
+  border-color: #007aff;
+}
+
+body.dark-theme .thread-title {
+  color: #e5e5e7;
+}
+
+body.dark-theme .thread-preview {
+  color: #86868b;
+}
+
+body.dark-theme .threads-view,
+body.dark-theme .settings-view,
+body.dark-theme .help-view {
+  background-color: #1e1e1e;
+}
+
+body.dark-theme .thread-header {
+  background-color: #252525;
+  border-bottom-color: #3c3c43;
+}
+
+body.dark-theme .thread-title-text {
+  color: #e5e5e7;
+}
+
+body.dark-theme .messages-container {
+  background-color: #1e1e1e;
+}
+
+body.dark-theme .message.assistant {
+  background-color: #2d2d2d;
+  color: #e5e5e7;
+  border-color: #3c3c43;
+}
+
+body.dark-theme .message.system {
+  background-color: #252525;
+  color: #e5e5e7;
+  border-left-color: #34c759;
+}
+
+body.dark-theme .input-area {
+  background-color: #252525;
+  border-top-color: #3c3c43;
+}
+
+body.dark-theme .message-input,
+body.dark-theme .api-endpoint-input,
+body.dark-theme .api-body-input {
+  background-color: #2d2d2d;
+  border-color: #3c3c43;
+  color: #e5e5e7;
+}
+
+body.dark-theme .message-input::placeholder,
+body.dark-theme .api-endpoint-input::placeholder,
+body.dark-theme .api-body-input::placeholder {
+  color: #86868b;
+}
+
+body.dark-theme .settings-header,
+body.dark-theme .help-header {
+  background-color: #252525;
+  border-bottom-color: #3c3c43;
+}
+
+body.dark-theme .settings-title,
+body.dark-theme .help-title {
+  color: #e5e5e7;
+}
+
+body.dark-theme .settings-section,
+body.dark-theme .help-section {
+  background-color: #252525;
+  border-color: #3c3c43;
+}
+
+body.dark-theme .section-title {
+  color: #e5e5e7;
+}
+
+body.dark-theme .setting-label {
+  color: #e5e5e7;
+}
+
+body.dark-theme .setting-input,
+body.dark-theme .setting-select {
+  background-color: #2d2d2d;
+  border-color: #3c3c43;
+  color: #e5e5e7;
+}
+
+body.dark-theme .setting-checkbox {
+  color: #e5e5e7;
+}
+
+body.dark-theme .api-status-display {
+  background-color: #2d2d2d;
+  border-color: #3c3c43;
+}
+
+body.dark-theme .about-info {
+  background-color: #2d2d2d;
+  border-color: #3c3c43;
+  color: #e5e5e7;
+}
+
+body.dark-theme .about-info p {
+  color: #e5e5e7;
+}
+
+body.dark-theme .settings-btn {
+  background-color: #2d2d2d;
+  border-color: #3c3c43;
+  color: #e5e5e7;
+}
+
+body.dark-theme .settings-btn:hover {
+  background-color: #3c3c43;
+}
+
+body.dark-theme .settings-btn.primary {
+  background-color: #007aff;
+  color: white;
+  border-color: #007aff;
+}
+
+body.dark-theme .settings-btn.primary:hover {
+  background-color: #0051d5;
+}
+
+body.dark-theme .gemini-settings-json {
+  background-color: #2d2d2d;
+  border-color: #3c3c43;
+  color: #e5e5e7;
+}
+
+body.dark-theme .gemini-not-found {
+  background-color: #3c2d1f;
+  border-color: #ff9500;
+}
+
+body.dark-theme .gemini-not-found p {
+  color: #e5e5e7;
+}
+
+body.dark-theme .status-bar {
+  background-color: #252525;
+  border-top-color: #3c3c43;
+  color: #86868b;
+}
+
+body.dark-theme .help-text {
+  color: #e5e5e7;
+}
+
+body.dark-theme .help-list li {
+  color: #e5e5e7;
+}
+
+body.dark-theme ::-webkit-scrollbar-track {
+  background: #1e1e1e;
+}
+
+body.dark-theme ::-webkit-scrollbar-thumb {
+  background: #3c3c43;
+}
+
+body.dark-theme ::-webkit-scrollbar-thumb:hover {
+  background: #4c4c4f;
 }
 

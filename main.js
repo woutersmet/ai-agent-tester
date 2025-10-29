@@ -1,5 +1,7 @@
 const { app, BrowserWindow, ipcMain, nativeImage, Menu } = require('electron');
 const path = require('path');
+const fs = require('fs').promises;
+const os = require('os');
 const expressApp = require('./server/app');
 
 // Detect if running in development mode (must be done early, before app is ready)
@@ -213,5 +215,29 @@ ipcMain.handle('restart-app', () => {
   console.log('🔄 Restarting app...');
   app.relaunch();
   app.exit(0);
+});
+
+ipcMain.handle('get-gemini-settings', async () => {
+  try {
+    const homeDir = os.homedir();
+    const geminiSettingsPath = path.join(homeDir, '.gemini', 'settings.json');
+
+    // Check if file exists
+    try {
+      await fs.access(geminiSettingsPath);
+    } catch (error) {
+      // File doesn't exist
+      return { found: false };
+    }
+
+    // Read and parse the file
+    const fileContent = await fs.readFile(geminiSettingsPath, 'utf-8');
+    const settings = JSON.parse(fileContent);
+
+    return { found: true, settings };
+  } catch (error) {
+    console.error('Error reading Gemini settings:', error);
+    return { found: false, error: error.message };
+  }
 });
 

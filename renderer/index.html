@@ -165,10 +165,7 @@
           <i data-lucide="settings" class="header-icon"></i>
           <span>Settings</span>
         </h2>
-        <p class="settings-disclaimer">
-          <i data-lucide="alert-circle" class="disclaimer-icon"></i>
-          <span>Note: This is currently a static mockup. Settings do not take effect yet.</span>
-        </p>
+
       </div>
 
       <div class="settings-container">
@@ -176,14 +173,8 @@
           <h3 class="section-title">General</h3>
           <div class="setting-item">
             <label class="setting-label">
-              <span>Application Name</span>
-              <input type="text" class="setting-input" value="AI Agent Tester" readonly>
-            </label>
-          </div>
-          <div class="setting-item">
-            <label class="setting-label">
               <span>Theme</span>
-              <select class="setting-select">
+              <select class="setting-select" id="themeSelect">
                 <option value="light" selected>Light</option>
                 <option value="dark">Dark</option>
               </select>
@@ -229,6 +220,13 @@
               <input type="checkbox">
               <span>Allow custom commands (⚠️ Use with caution)</span>
             </label>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h3 class="section-title">Gemini Settings</h3>
+          <div id="geminiSettingsContent">
+            <p class="loading-text">Loading Gemini CLI settings...</p>
           </div>
         </div>
 

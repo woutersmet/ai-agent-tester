@@ -48,6 +48,9 @@ const navItems = document.querySelectorAll('.nav-item');
 async function init() {
   console.log('Initializing AI Agent Tester...');
 
+  // Load theme preference first (before rendering)
+  loadThemePreference();
+
   // Check API health
   await checkAPIHealth();
 
@@ -882,6 +885,75 @@ async function loadSettingsInfo() {
   if (nodeVersionEl) {
     nodeVersionEl.textContent = 'v20.x (via Electron)';
   }
+
+  // Load Gemini settings
+  await loadGeminiSettings();
+
+  // Load saved theme preference
+  loadThemePreference();
+}
+
+// Load Gemini CLI settings
+async function loadGeminiSettings() {
+  const geminiContent = document.getElementById('geminiSettingsContent');
+  if (!geminiContent) return;
+
+  if (!window.electronAPI || !window.electronAPI.getGeminiSettings) {
+    geminiContent.innerHTML = '<p class="loading-text">Gemini settings not available in this environment.</p>';
+    return;
+  }
+
+  try {
+    const result = await window.electronAPI.getGeminiSettings();
+
+    if (result.found) {
+      // Display the settings as formatted JSON
+      const jsonString = JSON.stringify(result.settings, null, 2);
+      geminiContent.innerHTML = `<pre class="gemini-settings-json">${escapeHtml(jsonString)}</pre>`;
+    } else {
+      // Show installation message
+      geminiContent.innerHTML = `
+        <div class="gemini-not-found">
+          <p><strong>Gemini CLI not found</strong></p>
+          <p>It looks like the Gemini CLI hasn't been installed yet.</p>
+          <p>To install Gemini CLI, please follow the instructions at:</p>
+          <p><a href="https://github.com/google-gemini/gemini-cli" target="_blank" rel="noopener noreferrer">https://github.com/google-gemini/gemini-cli</a></p>
+        </div>
+      `;
+    }
+  } catch (error) {
+    console.error('Failed to load Gemini settings:', error);
+    geminiContent.innerHTML = '<p class="loading-text">Error loading Gemini settings.</p>';
+  }
+}
+
+// Helper function to escape HTML
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// Load theme preference from localStorage
+function loadThemePreference() {
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  applyTheme(savedTheme);
+
+  // Update the select element
+  const themeSelect = document.getElementById('themeSelect');
+  if (themeSelect) {
+    themeSelect.value = savedTheme;
+  }
+}
+
+// Apply theme to the page
+function applyTheme(theme) {
+  if (theme === 'dark') {
+    document.body.classList.add('dark-theme');
+  } else {
+    document.body.classList.remove('dark-theme');
+  }
+  localStorage.setItem('theme', theme);
 }
 
 // Setup event listeners
@@ -949,6 +1021,15 @@ function setupEventListeners() {
 
   // Delete thread button
   deleteThreadBtn.addEventListener('click', deleteCurrentThread);
+
+  // Theme select change handler
+  const themeSelect = document.getElementById('themeSelect');
+  if (themeSelect) {
+    themeSelect.addEventListener('change', (e) => {
+      applyTheme(e.target.value);
+      updateStatus(`Theme changed to ${e.target.value}`);
+    });
+  }
 
   // Search input
   searchInput.addEventListener('input', (e) => {

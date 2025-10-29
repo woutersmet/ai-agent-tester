@@ -5,7 +5,8 @@ const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('electronAPI', {
   getAppVersion: () => ipcRenderer.invoke('get-app-version'),
   getAppPath: () => ipcRenderer.invoke('get-app-path'),
-  restartApp: () => ipcRenderer.invoke('restart-app')
+  restartApp: () => ipcRenderer.invoke('restart-app'),
+  getGeminiSettings: () => ipcRenderer.invoke('get-gemini-settings')
 });
 
 console.log('Preload script loaded');

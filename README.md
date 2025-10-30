@@ -231,7 +231,7 @@ const PORT = 3000; // Change to another port like 3001
 
 This project includes a sample **Model Context Protocol (MCP)** server that provides access to famous quotes. This is a great example of how to create a simple MCP server in a single Node.js file.
 
-The MCP server is located in `mcp-servers/famous-quotes/` with its own `package.json` and dependencies, keeping it isolated from the main Electron app.
+The MCP server is located at the root level as `famous-quotes-mcp-server.js` - a standalone file with no dependencies, making it easy to use and deploy.
 
 ### What is MCP?
 
@@ -250,27 +250,14 @@ The Famous Quotes MCP server provides four tools:
 
 #### Installation
 
-First, navigate to the MCP server directory and install dependencies:
-
-```bash
-cd mcp-servers/famous-quotes
-npm install
-```
+No installation needed! The server is a standalone Node.js file with no dependencies.
 
 #### Running Standalone
 
-You can test the server directly:
+You can test the server directly from the project root:
 
 ```bash
-cd mcp-servers/famous-quotes
-npm start
-```
-
-Or run the test suite:
-
-```bash
-cd mcp-servers/famous-quotes
-npm test
+node famous-quotes-mcp-server.js
 ```
 
 The server communicates via stdio (standard input/output), so it will wait for JSON-RPC messages. You'll see console logs when tools are called.
@@ -299,15 +286,18 @@ Edit `mcp_settings.json` and add the Famous Quotes server:
     "famous-quotes": {
       "command": "node",
       "args": [
-        "/Users/wouter.smet/Projects/ai-agent-tester/mcp-servers/famous-quotes/famous-quotes-mcp-server.js"
+        "/your-path-to/ai-agent-tester/famous-quotes-mcp-server.js"
       ],
       "env": {}
     }
   }
 }
+
+// so if you are Wouter Smet developing locally the path would be something like:
+// "/Users/wouter.smet/Projects/ai-agent-tester/famous-quotes-mcp-server.js"
 ```
 
-**Important**: Replace `/Users/wouter.smet/Projects/ai-agent-tester/` with the actual absolute path to your project directory.
+**Important**: Replace `your-path-to/ai-agent-tester` with the actual absolute path to your project directory. So something like `/Users/wouter.smet/Projects/ai-agent-tester/famous-quotes-mcp-server.js`
 
 #### Step 3: Restart Gemini Desktop App
 

@@ -2,9 +2,15 @@
 
 /**
  * Famous Quotes MCP Server - Standalone Version (No Dependencies)
- * 
+ *
  * This is a minimal implementation of the Model Context Protocol (MCP)
  * that works over stdio without requiring any external dependencies.
+ *
+ * Exposed Tools:
+ * - search_quotes: Search for famous quotes by keyword or author name
+ * - list_all_quotes: List all available famous quotes in the database
+ * - get_random_quote: Get a random famous quote
+ * - list_authors: List all unique authors in the quotes database
  */
 
 // Famous quotes database

@@ -333,9 +333,9 @@ ipcMain.handle('start-mcp-server', async () => {
       return { success: false, error: 'MCP server is already running' };
     }
 
-    // Use the standalone version that has no dependencies
-    const mcpServerPath = path.join(__dirname, 'mcp-servers', 'famous-quotes', 'famous-quotes-standalone.js');
-    const mcpServerDir = path.join(__dirname, 'mcp-servers', 'famous-quotes');
+    // Use the root level standalone version that has no dependencies
+    const mcpServerPath = path.join(__dirname, 'famous-quotes-mcp-server.js');
+    const mcpServerDir = __dirname;
 
     // Check if the server file exists
     try {
@@ -426,7 +426,7 @@ ipcMain.handle('get-mcp-server-status', async () => {
   const isRunning = mcpServerProcess !== null && !mcpServerProcess.killed;
 
   if (isRunning) {
-    const mcpServerPath = path.join(__dirname, 'mcp-servers', 'famous-quotes', 'famous-quotes-mcp-server.js');
+    const mcpServerPath = path.join(__dirname, 'famous-quotes-mcp-server.js');
     return {
       running: true,
       pid: mcpServerProcess.pid,

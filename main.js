@@ -313,16 +313,17 @@ ipcMain.handle('get-chatgpt-settings', async () => {
 
 // MCP Server Management
 let mcpServerProcess = null;
-let mcpServerPort = null;
 
-// Start the Famous Quotes MCP Server
+// Start the Famous Quotes MCP Server (standalone version - no dependencies needed)
 ipcMain.handle('start-mcp-server', async () => {
   try {
     if (mcpServerProcess) {
-      return { success: false, error: 'MCP server is already running', port: mcpServerPort };
+      return { success: false, error: 'MCP server is already running' };
     }
 
-    const mcpServerPath = path.join(__dirname, 'mcp-servers', 'famous-quotes', 'famous-quotes-mcp-server.js');
+    // Use the standalone version that has no dependencies
+    const mcpServerPath = path.join(__dirname, 'mcp-servers', 'famous-quotes', 'famous-quotes-standalone.js');
+    const mcpServerDir = path.join(__dirname, 'mcp-servers', 'famous-quotes');
 
     // Check if the server file exists
     try {
@@ -333,7 +334,7 @@ ipcMain.handle('start-mcp-server', async () => {
 
     // Start the MCP server process
     mcpServerProcess = spawn('node', [mcpServerPath], {
-      cwd: path.join(__dirname, 'mcp-servers', 'famous-quotes'),
+      cwd: mcpServerDir,
       stdio: ['pipe', 'pipe', 'pipe']
     });
 
@@ -353,13 +354,11 @@ ipcMain.handle('start-mcp-server', async () => {
     mcpServerProcess.on('close', (code) => {
       console.log(`[MCP Server] Process exited with code ${code}`);
       mcpServerProcess = null;
-      mcpServerPort = null;
     });
 
     mcpServerProcess.on('error', (error) => {
       console.error('[MCP Server] Failed to start:', error);
       mcpServerProcess = null;
-      mcpServerPort = null;
     });
 
     // Give it a moment to start
@@ -402,7 +401,6 @@ ipcMain.handle('stop-mcp-server', async () => {
     }
 
     mcpServerProcess = null;
-    mcpServerPort = null;
 
     return { success: true, message: 'MCP server stopped successfully' };
   } catch (error) {

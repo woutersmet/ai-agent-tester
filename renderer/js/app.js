@@ -498,7 +498,7 @@ async function executeCommand() {
       } else if (commandId === 'claude') {
         rawCommand = `claude -p "${userMessage}"`;
       } else if (commandId === 'chatgpt') {
-        rawCommand = `chatgpt "${userMessage}"`;
+        rawCommand = `codex "${userMessage}"`;
       } else {
         rawCommand = `${commandId} "${userMessage}"`;
       }

@@ -229,7 +229,7 @@ export function generateSessionTitle(commandId, userMessage) {
   const commandTitles = {
     'gemini': 'Chat with Gemini',
     'claude': 'Chat with Claude',
-    'chatgpt': 'Chat with ChatGPT',
+    'chatgpt': 'Chat with ChatGPT Codex',
     'raw-terminal': 'Running Terminal Commands',
     'api-request': 'API Request',
     'ls': 'List Files',

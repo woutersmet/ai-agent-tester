@@ -1,3 +1,17 @@
+// Import utilities
+import {
+  formatTime,
+  escapeHtml,
+  processCurlResponse,
+  loadThemePreference,
+  applyTheme,
+  updateStatus,
+  updateAPIStatus,
+  generateSessionTitle,
+  loadApiRequestValues,
+  saveApiRequestValues
+} from './ui-utils.js';
+
 // API Configuration
 const API_BASE_URL = 'http://localhost:3000/api';
 
@@ -21,8 +35,6 @@ const clearBtn = document.getElementById('clearBtn');
 const commandSelect = document.getElementById('commandSelect');
 const newSessionBtn = document.getElementById('newSessionBtn');
 const restartBtn = document.getElementById('restartBtn');
-const statusText = document.getElementById('statusText');
-const apiStatus = document.getElementById('apiStatus');
 const searchInput = document.getElementById('searchInput');
 const inputWrapper = document.getElementById('inputWrapper');
 const inputWrapperApi = document.getElementById('inputWrapperApi');
@@ -225,24 +237,22 @@ function updateQuickActions(commandId) {
 }
 
 // Load saved API request values from localStorage
-function loadApiRequestValues() {
-  const savedUrl = localStorage.getItem('apiRequestUrl');
-  const savedToken = localStorage.getItem('apiRequestToken');
-  const savedBody = localStorage.getItem('apiRequestBody');
-  const savedMethod = localStorage.getItem('apiRequestMethod');
-
-  if (savedUrl) apiUrlInput.value = savedUrl;
-  if (savedToken) apiTokenInput.value = savedToken;
-  if (savedBody) apiBodyInput.value = savedBody;
-  if (savedMethod) apiMethodSelect.value = savedMethod;
+function loadApiRequestValuesIntoForm() {
+  const values = loadApiRequestValues();
+  if (values.url) apiUrlInput.value = values.url;
+  if (values.token) apiTokenInput.value = values.token;
+  if (values.body) apiBodyInput.value = values.body;
+  if (values.method) apiMethodSelect.value = values.method;
 }
 
 // Save API request values to localStorage
-function saveApiRequestValues() {
-  localStorage.setItem('apiRequestUrl', apiUrlInput.value.trim());
-  localStorage.setItem('apiRequestToken', apiTokenInput.value.trim());
-  localStorage.setItem('apiRequestBody', apiBodyInput.value.trim());
-  localStorage.setItem('apiRequestMethod', apiMethodSelect.value);
+function saveApiRequestValuesFromForm() {
+  saveApiRequestValues({
+    url: apiUrlInput.value.trim(),
+    token: apiTokenInput.value.trim(),
+    body: apiBodyInput.value.trim(),
+    method: apiMethodSelect.value
+  });
 }
 
 // Update input mode based on selected command
@@ -267,7 +277,7 @@ function updateInputMode(commandId) {
     inputWrapperDisabled.classList.add('hidden');
 
     // Load saved values
-    loadApiRequestValues();
+    loadApiRequestValuesIntoForm();
 
     // Hide body input by default (GET is default)
     if (apiMethodSelect.value === 'POST') {
@@ -463,7 +473,7 @@ async function executeCommand() {
 
     if (cmdConfig && cmdConfig.isApiRequest) {
       // Save API request values to localStorage
-      saveApiRequestValues();
+      saveApiRequestValuesFromForm();
 
       content = `${apiMethod} ${apiUrl}`;
       // Build curl command with optional token and body
@@ -762,34 +772,6 @@ function searchSessions(query) {
 
   renderSessionList();
   updateStatus(searchQuery ? `Found ${filteredSessions.length} session(s)` : 'Ready');
-}
-
-// Generate session title based on command
-function generateSessionTitle(commandId, userMessage) {
-  const commandTitles = {
-    'gemini': 'Chat with Gemini',
-    'claude': 'Chat with Claude',
-    'chatgpt': 'Chat with ChatGPT',
-    'raw-terminal': 'Running Terminal Commands',
-    'api-request': 'API Request',
-    'ls': 'List Files',
-    'whoami': 'Check User',
-    'node-version': 'Check Node Version',
-    'echo-test': 'Echo Test'
-  };
-
-  // If we have a predefined title, use it
-  if (commandTitles[commandId]) {
-    return commandTitles[commandId];
-  }
-
-  // Otherwise, create a title from the command
-  if (userMessage && userMessage.length > 0) {
-    const truncated = userMessage.length > 30 ? userMessage.substring(0, 30) + '...' : userMessage;
-    return `Command: ${truncated}`;
-  }
-
-  return `Command: ${commandId}`;
 }
 
 // Save session to backend
@@ -1116,101 +1098,7 @@ async function loadGeminiSettings() {
   }
 }
 
-// Helper function to escape HTML
-function escapeHtml(text) {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
-}
 
-// Process curl response: strip headers and format JSON
-function processCurlResponse(output) {
-  // Check if this looks like a curl response with -i flag (includes headers)
-  const lines = output.split('\n');
-
-  // Find the first line (HTTP status line)
-  let statusLine = '';
-  let bodyStartIndex = 0;
-  let foundBlankLine = false;
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
-
-    // First non-empty line is the status line
-    if (!statusLine && line && line.startsWith('HTTP/')) {
-      statusLine = lines[i];
-      continue;
-    }
-
-    // Find the blank line that separates headers from body
-    if (statusLine && !foundBlankLine) {
-      if (line === '') {
-        foundBlankLine = true;
-        bodyStartIndex = i + 1;
-        break;
-      }
-    }
-  }
-
-  // Extract the body
-  const bodyText = foundBlankLine ? lines.slice(bodyStartIndex).join('\n').trim() : output;
-
-  // Try to detect and format JSON from the body
-  let jsonData = null;
-  let jsonFormatted = null;
-
-  try {
-    // Try to parse as JSON
-    jsonData = JSON.parse(bodyText);
-    jsonFormatted = JSON.stringify(jsonData, null, 2);
-  } catch (e) {
-    // Not valid JSON, that's okay
-  }
-
-  // Build the final output
-  let finalOutput = '';
-  if (statusLine && foundBlankLine) {
-    // If we have headers, include the status line
-    finalOutput = statusLine + '\n\n';
-    // If we have formatted JSON, use that instead of raw body
-    if (jsonFormatted) {
-      finalOutput += jsonFormatted;
-    } else {
-      finalOutput += bodyText;
-    }
-  } else {
-    // No headers detected, just use the formatted JSON or original output
-    finalOutput = jsonFormatted || output;
-  }
-
-  return {
-    processed: finalOutput,
-    hasJson: jsonData !== null,
-    jsonFormatted: jsonFormatted
-  };
-}
-
-// Load theme preference from localStorage
-function loadThemePreference() {
-  const savedTheme = localStorage.getItem('theme') || 'light';
-  applyTheme(savedTheme);
-
-  // Update the select element
-  const themeSelect = document.getElementById('themeSelect');
-  if (themeSelect) {
-    themeSelect.value = savedTheme;
-  }
-}
-
-// Apply theme to the page
-function applyTheme(theme) {
-  if (theme === 'dark') {
-    document.body.classList.add('dark-theme');
-  } else {
-    document.body.classList.remove('dark-theme');
-  }
-  localStorage.setItem('theme', theme);
-}
 
 // Setup event listeners
 function setupEventListeners() {
@@ -1352,66 +1240,7 @@ function setupEventListeners() {
   });
 }
 
-// Utility functions
-function formatTime(timestamp) {
-  const date = new Date(timestamp);
-  const now = new Date();
-  const diff = now - date;
 
-  // Less than 1 minute
-  if (diff < 60000) {
-    return 'Just now';
-  }
-
-  // Less than 1 hour
-  if (diff < 3600000) {
-    const minutes = Math.floor(diff / 60000);
-    return `${minutes}m ago`;
-  }
-
-  // Less than 24 hours
-  if (diff < 86400000) {
-    const hours = Math.floor(diff / 3600000);
-    return `${hours}h ago`;
-  }
-
-  // Format as date
-  return date.toLocaleDateString();
-}
-
-function formatTimestamp(timestamp) {
-  const date = new Date(timestamp);
-  const options = {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  };
-  return date.toLocaleString('en-US', options);
-}
-
-function escapeHtml(text) {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
-}
-
-function updateStatus(message) {
-  statusText.textContent = message;
-  console.log('Status:', message);
-}
-
-function updateAPIStatus(isHealthy) {
-  const indicator = apiStatus.querySelector('.status-indicator');
-  if (isHealthy) {
-    indicator.style.color = '#4ec9b0';
-    apiStatus.title = 'API is healthy';
-  } else {
-    indicator.style.color = '#f48771';
-    apiStatus.title = 'API is not responding';
-  }
-}
 
 // Initialize when DOM is ready
 if (document.readyState === 'loading') {

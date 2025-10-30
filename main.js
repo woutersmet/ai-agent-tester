@@ -97,6 +97,21 @@ function createMenu() {
       ]
     },
     {
+      label: 'File',
+      submenu: [
+        {
+          label: 'New Session',
+          accelerator: 'CmdOrCtrl+N',
+          click: () => {
+            console.log('📝 Creating new session via Cmd+N...');
+            if (mainWindow) {
+              mainWindow.webContents.send('new-session');
+            }
+          }
+        }
+      ]
+    },
+    {
       label: 'Edit',
       submenu: [
         { role: 'undo' },

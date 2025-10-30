@@ -64,6 +64,14 @@ async function init() {
   // Setup event listeners
   setupEventListeners();
 
+  // Setup keyboard shortcut listener for CMD+N
+  if (window.electronAPI && window.electronAPI.onNewSession) {
+    window.electronAPI.onNewSession(() => {
+      console.log('New session triggered via CMD+N');
+      createNewSession();
+    });
+  }
+
   // Automatically create a new session on startup
   createNewSession();
 

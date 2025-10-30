@@ -188,25 +188,6 @@
         </div>
 
         <div class="settings-section">
-          <h3 class="section-title">Electron API Configuration</h3>
-          <div class="setting-item">
-            <label class="setting-label">
-              <span>API Base URL</span>
-              <input type="text" class="setting-input" value="http://localhost:3000/api" readonly>
-            </label>
-          </div>
-          <div class="setting-item">
-            <label class="setting-label">
-              <span>API Status</span>
-              <div class="api-status-display">
-                <span class="status-dot"></span>
-                <span id="settingsApiStatus">Connected</span>
-              </div>
-            </label>
-          </div>
-        </div>
-
-        <div class="settings-section">
           <h3 class="section-title">
             <span>Gemini Settings</span>
             <span class="cli-version-pill checking" id="geminiVersionPill">
@@ -289,6 +270,26 @@
               <strong>For Gemini:</strong> Add to <code>~/Library/Application Support/Google/Gemini Desktop/mcp_settings.json</code> <a href="#" class="vscode-link" data-file="~/Library/Application Support/Google/Gemini Desktop/mcp_settings.json">Open with VS Code</a><br>
               <strong>For Claude:</strong> Add to <code>~/.claude.json</code> <a href="#" class="vscode-link" data-file="~/.claude.json">Open with VS Code</a> under the <code>mcpServers</code> key
             </p>
+          </div>
+        </div>
+
+
+        <div class="settings-section">
+          <h3 class="section-title">Electron API Configuration</h3>
+          <div class="setting-item">
+            <label class="setting-label">
+              <span>API Base URL</span>
+              <input type="text" class="setting-input" value="http://localhost:3000/api" readonly>
+            </label>
+          </div>
+          <div class="setting-item">
+            <label class="setting-label">
+              <span>API Status</span>
+              <div class="api-status-display">
+                <span class="status-dot"></span>
+                <span id="settingsApiStatus">Connected</span>
+              </div>
+            </label>
           </div>
         </div>
 

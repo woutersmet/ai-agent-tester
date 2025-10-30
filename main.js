@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs').promises;
 const os = require('os');
 const { spawn, exec } = require('child_process');
+const http = require('http');
 const expressApp = require('./server/app');
 
 // Detect if running in development mode (must be done early, before app is ready)
@@ -219,8 +220,44 @@ app.whenReady().then(async () => {
     // Start Express server and wait for it to be fully ready
     await startExpressServer();
 
-    // Give the server a moment to fully initialize
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // Initialize session storage before creating window
+    console.log('🗄️  Initializing session storage...');
+    if (expressApp.initializeSessionStorage) {
+      await expressApp.initializeSessionStorage();
+      console.log('✅ Session storage initialized');
+    }
+
+    // Wait for server to be fully responsive
+    console.log('🔍 Checking server health...');
+    let serverReady = false;
+    for (let i = 0; i < 10; i++) {
+      try {
+        await new Promise((resolve, reject) => {
+          const req = http.get(`http://localhost:${PORT}/api/health`, (res) => {
+            if (res.statusCode === 200) {
+              serverReady = true;
+              console.log('✅ Server is ready');
+              resolve();
+            } else {
+              reject(new Error(`Server returned ${res.statusCode}`));
+            }
+          });
+          req.on('error', reject);
+          req.setTimeout(1000, () => {
+            req.destroy();
+            reject(new Error('Timeout'));
+          });
+        });
+        if (serverReady) break;
+      } catch (error) {
+        // Server not ready yet, wait a bit
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    }
+
+    if (!serverReady) {
+      console.warn('⚠️  Server health check timed out, but continuing anyway');
+    }
 
     createMenu();
     createWindow();

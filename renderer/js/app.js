@@ -101,36 +101,65 @@ async function init() {
   updateStatus('Ready');
 }
 
-// Check API health
+// Check API health with retry logic
 async function checkAPIHealth() {
-  try {
-    const response = await fetch(`${API_BASE_URL}/health`);
-    const data = await response.json();
-    
-    if (data.status === 'ok') {
-      updateAPIStatus(true);
-      console.log('API is healthy:', data);
+  const maxRetries = 10;
+  const retryDelay = 200;
+
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/health`);
+      const data = await response.json();
+
+      if (data.status === 'ok') {
+        updateAPIStatus(true);
+        console.log('API is healthy:', data);
+        return true;
+      }
+    } catch (error) {
+      console.log(`API health check attempt ${i + 1}/${maxRetries} failed:`, error.message);
+      if (i < maxRetries - 1) {
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+      }
     }
-  } catch (error) {
-    console.error('API health check failed:', error);
-    updateAPIStatus(false);
   }
+
+  console.error('API health check failed after all retries');
+  updateAPIStatus(false);
+  return false;
 }
 
-// Load sessions from API
+// Load sessions from API with retry logic
 async function loadSessions() {
-  try {
-    updateStatus('Loading sessions...');
-    const response = await fetch(`${API_BASE_URL}/threads`);
-    const data = await response.json();
-    sessions = data.threads;
-    filteredSessions = sessions;
-    renderSessionList();
-    updateStatus('Sessions loaded');
-  } catch (error) {
-    console.error('Failed to load sessions:', error);
-    sessionList.innerHTML = '<div class="loading">Failed to load sessions</div>';
-    updateStatus('Error loading sessions');
+  const maxRetries = 5;
+  const retryDelay = 300;
+
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      updateStatus(`Loading sessions...${i > 0 ? ` (attempt ${i + 1})` : ''}`);
+      const response = await fetch(`${API_BASE_URL}/threads`);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      sessions = data.threads;
+      filteredSessions = sessions;
+      renderSessionList();
+      updateStatus('Sessions loaded');
+      return;
+    } catch (error) {
+      console.log(`Failed to load sessions (attempt ${i + 1}/${maxRetries}):`, error.message);
+
+      if (i < maxRetries - 1) {
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+      } else {
+        console.error('Failed to load sessions after all retries:', error);
+        sessionList.innerHTML = '<div class="loading">Failed to load sessions. Please reload the app.</div>';
+        updateStatus('Error loading sessions');
+      }
+    }
   }
 }
 

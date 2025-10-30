@@ -27,7 +27,7 @@ if (process.platform === 'darwin') {
 
 let mainWindow;
 let server;
-const PORT = 3000;
+let PORT = 3000; // Will be updated if port is in use
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -75,21 +75,46 @@ function createWindow() {
   });
 }
 
-function startExpressServer() {
+function findAvailablePort(startPort) {
   return new Promise((resolve, reject) => {
-    server = expressApp.listen(PORT, () => {
-      console.log(`✅ Express server running on http://localhost:${PORT}`);
-      resolve();
+    const net = require('net');
+    const server = net.createServer();
+
+    server.listen(startPort, () => {
+      const port = server.address().port;
+      server.close(() => resolve(port));
     });
 
-    server.on('error', (error) => {
-      if (error.code === 'EADDRINUSE') {
-        console.error(`❌ Port ${PORT} is already in use`);
-        reject(error);
+    server.on('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        // Port is in use, try next port
+        resolve(findAvailablePort(startPort + 1));
       } else {
-        reject(error);
+        reject(err);
       }
     });
+  });
+}
+
+function startExpressServer() {
+  return new Promise(async (resolve, reject) => {
+    try {
+      // Find an available port starting from 3000
+      PORT = await findAvailablePort(PORT);
+      console.log(`🔍 Using port ${PORT}`);
+
+      server = expressApp.listen(PORT, () => {
+        console.log(`✅ Express server running on http://localhost:${PORT}`);
+        resolve();
+      });
+
+      server.on('error', (error) => {
+        console.error(`❌ Server error:`, error);
+        reject(error);
+      });
+    } catch (error) {
+      reject(error);
+    }
   });
 }
 

@@ -5,14 +5,33 @@ const sessionStorage = require('./sessionStorage');
 
 const app = express();
 
-// Initialize session storage on startup
-sessionStorage.initialize().catch(err => {
-  console.error('Failed to initialize session storage:', err);
-});
+// Track if session storage has been initialized
+let sessionStorageInitialized = false;
+
+// Initialize session storage (will be called when server starts listening)
+async function initializeSessionStorage() {
+  if (!sessionStorageInitialized) {
+    try {
+      await sessionStorage.initialize();
+      sessionStorageInitialized = true;
+    } catch (err) {
+      console.error('Failed to initialize session storage:', err);
+    }
+  }
+}
+
+// Export the initialization function so main.js can call it
+app.initializeSessionStorage = initializeSessionStorage;
 
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Middleware to ensure session storage is initialized
+async function ensureSessionStorage(req, res, next) {
+  await initializeSessionStorage();
+  next();
+}
 
 // Track running processes for cancellation
 const runningProcesses = new Map();
@@ -294,7 +313,7 @@ app.post('/api/execute-custom', (req, res) => {
 });
 
 // Get sessions from file storage
-app.get('/api/threads', async (req, res) => {
+app.get('/api/threads', ensureSessionStorage, async (req, res) => {
   try {
     const sessions = await sessionStorage.getAllSessions();
     res.json({ threads: sessions });
@@ -305,7 +324,7 @@ app.get('/api/threads', async (req, res) => {
 });
 
 // Get session details
-app.get('/api/threads/:id', async (req, res) => {
+app.get('/api/threads/:id', ensureSessionStorage, async (req, res) => {
   try {
     const sessionId = parseInt(req.params.id);
     const session = await sessionStorage.getSessionById(sessionId);
@@ -322,7 +341,7 @@ app.get('/api/threads/:id', async (req, res) => {
 });
 
 // Save or create a session
-app.post('/api/threads', async (req, res) => {
+app.post('/api/threads', ensureSessionStorage, async (req, res) => {
   try {
     const session = req.body;
 
@@ -355,7 +374,7 @@ app.post('/api/threads', async (req, res) => {
 });
 
 // Add a message to a session
-app.post('/api/threads/:id/messages', async (req, res) => {
+app.post('/api/threads/:id/messages', ensureSessionStorage, async (req, res) => {
   try {
     const sessionId = parseInt(req.params.id);
     const message = req.body;
@@ -383,7 +402,7 @@ app.post('/api/threads/:id/messages', async (req, res) => {
 });
 
 // Delete a session
-app.delete('/api/threads/:id', async (req, res) => {
+app.delete('/api/threads/:id', ensureSessionStorage, async (req, res) => {
   try {
     const sessionId = parseInt(req.params.id);
 

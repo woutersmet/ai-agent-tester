@@ -929,15 +929,24 @@ async function deleteCurrentSession() {
     return;
   }
 
-  // Show confirmation dialog
+  // Get session details
   const session = sessions.find(t => t.id === currentSessionId);
   const sessionName = session ? session.title : `Session ${currentSessionId}`;
 
-  const confirmed = confirm(`Are you sure you want to delete "${sessionName}"?\n\nThis action cannot be undone.`);
+  // Check if session has messages - only show confirmation if it has messages
+  let hasMessages = false;
+  if (session && session.messages && session.messages.length > 0) {
+    hasMessages = true;
+  }
 
-  if (!confirmed) {
-    updateStatus('Delete cancelled');
-    return;
+  // Show confirmation dialog only if session has messages
+  if (hasMessages) {
+    const confirmed = confirm(`Are you sure you want to delete "${sessionName}"?\n\nThis action cannot be undone.`);
+
+    if (!confirmed) {
+      updateStatus('Delete cancelled');
+      return;
+    }
   }
 
   try {
@@ -1233,9 +1242,9 @@ function setupEventListeners() {
     // apiUrlInput.value = '';
     // apiTokenInput.value = '';
     // apiBodyInput.value = '';
-    commandSelect.value = '';
-    updateInputMode('');
+    // Don't clear the command selector - only clear the text input
     updateStatus('Cleared input');
+    messageInput.focus();
   });
 
   // Cancel button

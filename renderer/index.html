@@ -102,10 +102,6 @@
 
       <div class="input-area" id="inputArea">
         <div class="command-toolbar">
-          <button class="toolbar-btn" id="clearBtn" title="Clear">
-            <i data-lucide="trash-2" class="btn-icon"></i>
-            <span>Clear</span>
-          </button>
           <select class="command-select" id="commandSelect">
             <option value="">Select a command...</option>
           </select>
@@ -155,8 +151,14 @@
           <span class="waiting-text">Waiting for response...</span>
           <button class="cancel-btn" id="cancelBtn">Cancel</button>
         </div>
-        <div class="quick-actions hidden" id="quickActions">
-          <!-- Quick action buttons will be dynamically inserted here -->
+        <div class="bottom-actions">
+          <button class="toolbar-btn" id="clearBtn" title="Clear">
+            <i data-lucide="trash-2" class="btn-icon"></i>
+            <span>Clear</span>
+          </button>
+          <div class="quick-actions hidden" id="quickActions">
+            <!-- Quick action buttons will be dynamically inserted here -->
+          </div>
         </div>
       </div>
     </main>

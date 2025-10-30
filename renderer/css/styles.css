@@ -942,6 +942,7 @@ body {
   margin-bottom: 20px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
 }
 
@@ -950,13 +951,19 @@ body {
   align-items: center;
   gap: 6px;
   padding: 4px 10px;
-  background-color: #ffffff;
+  background-color: transparent;
   border: 1px solid #d1d1d6;
   border-radius: 12px;
   font-size: 12px;
   font-weight: 500;
   color: #6e6e73;
   position: relative;
+}
+
+.cli-version-pill .cli-name {
+  color: #6e6e73;
+  font-weight: 500;
+  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
 }
 
 .cli-version-pill .status-indicator {
@@ -1583,8 +1590,12 @@ body.dark-theme .section-title {
 }
 
 body.dark-theme .cli-version-pill {
-  background-color: #2d2d2d;
+  background-color: transparent;
   border-color: #3c3c43;
+  color: #86868b;
+}
+
+body.dark-theme .cli-version-pill .cli-name {
   color: #86868b;
 }
 
@@ -1593,7 +1604,7 @@ body.dark-theme .cli-version-pill .version-text {
 }
 
 body.dark-theme .cli-version-pill .status-indicator::after {
-  border-color: #2d2d2d;
+  border-color: #1e1e1e;
 }
 
 body.dark-theme .section-description {

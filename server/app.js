@@ -1,9 +1,27 @@
 const express = require('express');
 const { exec, spawn } = require('child_process');
 const cors = require('cors');
+const os = require('os');
 const sessionStorage = require('./sessionStorage');
 
 const app = express();
+
+// Helper function to get proper environment with PATH for spawned processes
+function getSpawnEnv() {
+  return {
+    ...process.env,
+    // Add common paths where CLI tools might be installed
+    PATH: [
+      process.env.PATH,
+      '/usr/local/bin',
+      '/opt/homebrew/bin',
+      '/usr/bin',
+      '/bin',
+      `${os.homedir()}/.local/bin`,
+      `${os.homedir()}/bin`
+    ].filter(Boolean).join(':')
+  };
+}
 
 // Track if session storage has been initialized
 let sessionStorageInitialized = false;
@@ -118,7 +136,7 @@ app.post('/api/execute', (req, res) => {
 
     console.log(`Executing API request: curl ${curlArgs.join(' ')}`);
 
-    const childProcess = spawn('curl', curlArgs);
+    const childProcess = spawn('curl', curlArgs, { env: getSpawnEnv() });
     let stdout = '';
     let stderr = '';
     let responseSent = false;
@@ -191,7 +209,7 @@ app.post('/api/execute', (req, res) => {
 
   console.log(`Executing: ${cmd} ${finalArgs.join(' ')}`);
 
-  const childProcess = spawn(cmd, finalArgs);
+  const childProcess = spawn(cmd, finalArgs, { env: getSpawnEnv() });
   let stdout = '';
   let stderr = '';
   let responseSent = false;
@@ -284,7 +302,11 @@ app.post('/api/execute-custom', (req, res) => {
   console.log(`Executing custom command: ${command}`);
   console.warn('⚠️  WARNING: Executing custom command without validation!');
 
-  const childProcess = exec(command, { timeout: 30000 }, (error, stdout, stderr) => {
+  const childProcess = exec(command, {
+    timeout: 30000,
+    env: getSpawnEnv(),
+    shell: process.platform === 'darwin' ? '/bin/zsh' : true
+  }, (error, stdout, stderr) => {
     // Remove from running processes
     if (processId) {
       runningProcesses.delete(processId);

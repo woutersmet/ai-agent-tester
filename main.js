@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, nativeImage, Menu } = require('electron');
+const { app, BrowserWindow, ipcMain, nativeImage, Menu, shell } = require('electron');
 const path = require('path');
 const fs = require('fs').promises;
 const os = require('os');
@@ -47,6 +47,15 @@ function createWindow() {
   });
 
   mainWindow.loadFile('renderer/index.html');
+
+  // Open external links in the default browser
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      shell.openExternal(url);
+      return { action: 'deny' };
+    }
+    return { action: 'allow' };
+  });
 
   // Show window when ready to prevent white flash and ensure server is ready
   mainWindow.once('ready-to-show', () => {

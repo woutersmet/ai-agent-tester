@@ -1187,6 +1187,18 @@ body {
   background-color: #0051d5;
 }
 
+/* Raw Config Section */
+.raw-config-section {
+  margin-top: 24px;
+}
+
+.raw-config-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #6e6e73;
+  margin-bottom: 8px;
+}
+
 /* Gemini Settings Styles */
 .gemini-settings-json {
   padding: 16px;
@@ -1194,13 +1206,268 @@ body {
   border-radius: 8px;
   border: 1px solid #e5e5ea;
   font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
-  font-size: 13px;
+  font-size: 12px;
   color: #1d1d1f;
   overflow-x: auto;
   overflow-y: auto;
-  max-height: 400px;
+  max-height: 200px;
   white-space: pre-wrap;
   word-wrap: break-word;
+}
+
+/* Settings Tabs */
+.settings-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid #e5e5ea;
+  padding-bottom: 0;
+}
+
+.settings-tab {
+  padding: 12px 20px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #6e6e73;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: -1px;
+}
+
+.settings-tab:hover {
+  color: #1d1d1f;
+}
+
+.settings-tab.active {
+  color: #007aff;
+  border-bottom-color: #007aff;
+}
+
+.settings-tab-content {
+  display: none;
+}
+
+.settings-tab-content.active {
+  display: block;
+}
+
+/* MCP Server Cards */
+.mcp-servers-container {
+  margin-bottom: 16px;
+}
+
+.mcp-servers-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin-bottom: 12px;
+}
+
+.mcp-server-card {
+  background-color: #ffffff;
+  border: 1px solid #e5e5ea;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.mcp-server-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.mcp-server-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.mcp-server-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin-bottom: 8px;
+}
+
+.mcp-server-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mcp-server-detail {
+  font-size: 13px;
+  color: #6e6e73;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.mcp-server-detail-label {
+  font-weight: 500;
+  min-width: 90px;
+  flex-shrink: 0;
+}
+
+.mcp-server-detail-value {
+  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  font-size: 12px;
+  color: #1d1d1f;
+  word-break: break-all;
+}
+
+.mcp-server-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.mcp-test-btn {
+  padding: 6px 16px;
+  background-color: #007aff;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+  min-width: 100px;
+}
+
+.mcp-test-btn:hover:not(:disabled) {
+  background-color: #0051d5;
+}
+
+.mcp-test-btn:disabled {
+  background-color: #d1d1d6;
+  cursor: not-allowed;
+}
+
+.mcp-test-btn.success {
+  background-color: #34c759;
+}
+
+.mcp-test-btn.success:hover:not(:disabled) {
+  background-color: #2da84a;
+}
+
+.mcp-test-btn.error {
+  background-color: #ff3b30;
+}
+
+.mcp-test-btn.error:hover:not(:disabled) {
+  background-color: #d32f2f;
+}
+
+.mcp-test-result-container {
+  margin-top: 12px;
+}
+
+.mcp-test-result {
+  padding: 8px 12px;
+  background-color: #f5f5f7;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.mcp-test-result.success {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+}
+
+.mcp-test-result.error {
+  background-color: #ffebee;
+  color: #c62828;
+  border: 1px solid #ef9a9a;
+}
+
+.mcp-tools-container {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e5ea;
+}
+
+.mcp-tools-header {
+  margin-bottom: 8px;
+}
+
+.mcp-tools-toggle {
+  color: #007aff;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.mcp-tools-toggle:hover {
+  text-decoration: underline;
+}
+
+.mcp-tools-content {
+  margin-top: 8px;
+}
+
+.mcp-tools-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #f5f5f7;
+  border-radius: 6px;
+  overflow: hidden;
+  font-size: 12px;
+}
+
+.mcp-tools-table thead {
+  background-color: #e5e5ea;
+}
+
+.mcp-tools-table th {
+  padding: 8px 12px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  color: #6e6e73;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mcp-tools-table td {
+  padding: 8px 12px;
+  border-top: 1px solid #e5e5ea;
+}
+
+.mcp-tool-name {
+  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  font-weight: 600;
+  color: #1d1d1f;
+}
+
+.mcp-tool-description {
+  color: #6e6e73;
+}
+
+.mcp-tool-params {
+  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  color: #6e6e73;
+  font-size: 11px;
+}
+
+.mcp-no-servers {
+  padding: 16px;
+  background-color: #f5f5f7;
+  border-radius: 8px;
+  color: #6e6e73;
+  font-size: 13px;
+  text-align: center;
 }
 
 .gemini-not-found {
@@ -1695,10 +1962,107 @@ body.dark-theme .settings-btn.primary:hover {
   background-color: #0051d5;
 }
 
+body.dark-theme .settings-tabs {
+  border-bottom-color: #3c3c43;
+}
+
+body.dark-theme .settings-tab {
+  color: #86868b;
+}
+
+body.dark-theme .settings-tab:hover {
+  color: #e5e5e7;
+}
+
+body.dark-theme .settings-tab.active {
+  color: #0a84ff;
+  border-bottom-color: #0a84ff;
+}
+
+body.dark-theme .raw-config-label {
+  color: #86868b;
+}
+
 body.dark-theme .gemini-settings-json {
   background-color: #2d2d2d;
   border-color: #3c3c43;
   color: #e5e5e7;
+}
+
+body.dark-theme .mcp-servers-title {
+  color: #e5e5e7;
+}
+
+body.dark-theme .mcp-server-card {
+  background-color: #2d2d2d;
+  border-color: #3c3c43;
+}
+
+body.dark-theme .mcp-server-name {
+  color: #e5e5e7;
+}
+
+body.dark-theme .mcp-server-detail {
+  color: #86868b;
+}
+
+body.dark-theme .mcp-server-detail-value {
+  color: #e5e5e7;
+}
+
+body.dark-theme .mcp-test-result {
+  background-color: #1e1e1e;
+  color: #e5e5e7;
+}
+
+body.dark-theme .mcp-test-result.success {
+  background-color: #1e3a1e;
+  color: #81c784;
+  border-color: #4caf50;
+}
+
+body.dark-theme .mcp-test-result.error {
+  background-color: #3a1e1e;
+  color: #e57373;
+  border-color: #ef5350;
+}
+
+body.dark-theme .mcp-tools-container {
+  border-top-color: #3c3c43;
+}
+
+body.dark-theme .mcp-tools-toggle {
+  color: #0a84ff;
+}
+
+body.dark-theme .mcp-tools-table {
+  background-color: #1e1e1e;
+}
+
+body.dark-theme .mcp-tools-table thead {
+  background-color: #2d2d2d;
+}
+
+body.dark-theme .mcp-tools-table th {
+  color: #86868b;
+}
+
+body.dark-theme .mcp-tools-table td {
+  border-top-color: #3c3c43;
+}
+
+body.dark-theme .mcp-tool-name {
+  color: #e5e5e7;
+}
+
+body.dark-theme .mcp-tool-description,
+body.dark-theme .mcp-tool-params {
+  color: #86868b;
+}
+
+body.dark-theme .mcp-no-servers {
+  background-color: #2d2d2d;
+  color: #86868b;
 }
 
 body.dark-theme .gemini-not-found {

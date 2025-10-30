@@ -174,18 +174,15 @@
       </div>
 
       <div class="settings-container">
-        <div class="settings-section">
-          <h3 class="section-title">General</h3>
-          <div class="setting-item">
-            <label class="setting-label">
-              <span>Theme</span>
-              <select class="setting-select" id="themeSelect">
-                <option value="light" selected>Light</option>
-                <option value="dark">Dark</option>
-              </select>
-            </label>
-          </div>
+
+        <!-- Settings Tabs -->
+        <div class="settings-tabs">
+          <button class="settings-tab active" data-tab="agents">Agents and Tools</button>
+          <button class="settings-tab" data-tab="advanced">Advanced</button>
         </div>
+
+        <!-- Agents and Tools Tab -->
+        <div class="settings-tab-content active" id="agentsTab">
 
         <div class="settings-section">
           <h3 class="section-title">
@@ -198,8 +195,18 @@
           </h3>
 
           <p class="section-description">Configuration loaded from <code>~/.gemini/settings.json</code> <a href="#" class="vscode-link" data-file="~/.gemini/settings.json">Open with VS Code</a></p>
-          <div id="geminiSettingsContent">
-            <p class="loading-text">Loading Gemini CLI settings...</p>
+
+          <!-- MCP Servers Section -->
+          <div id="geminiMcpServers">
+            <p class="loading-text">Loading MCP servers...</p>
+          </div>
+
+          <!-- Raw Config Section -->
+          <div id="geminiRawConfig" class="raw-config-section">
+            <p class="raw-config-label">Raw Config</p>
+            <div id="geminiSettingsContent">
+              <p class="loading-text">Loading Gemini CLI settings...</p>
+            </div>
           </div>
         </div>
 
@@ -214,8 +221,18 @@
           </h3>
           <p class="section-description"><strong>Prerequisite:</strong> Make sure you have the right Claude command line application installed. See <a href="https://docs.anthropic.com/en/docs/cli" target="_blank" rel="noopener noreferrer">documentation</a>.</p>
           <p class="section-description">Configuration loaded from <code>~/.claude.json</code> <a href="#" class="vscode-link" data-file="~/.claude.json">Open with VS Code</a></p>
-          <div id="claudeSettingsContent">
-            <p class="loading-text">Loading Claude CLI settings...</p>
+
+          <!-- MCP Servers Section -->
+          <div id="claudeMcpServers">
+            <p class="loading-text">Loading MCP servers...</p>
+          </div>
+
+          <!-- Raw Config Section -->
+          <div id="claudeRawConfig" class="raw-config-section">
+            <p class="raw-config-label">Raw Config</p>
+            <div id="claudeSettingsContent">
+              <p class="loading-text">Loading Claude CLI settings...</p>
+            </div>
           </div>
         </div>
 
@@ -230,8 +247,18 @@
           </h3>
           <p class="section-description"><strong>Prerequisite:</strong> Make sure you have the right ChatGPT <strong>Codex CLI</strong> application installed. See <a href="https://developers.openai.com/codex/cli" target="_blank" rel="noopener noreferrer">documentation</a>.</p>
           <p class="section-description">Configuration loaded from <code>~/.codex/config.toml</code> <a href="#" class="vscode-link" data-file="~/.codex/config.toml">Open with VS Code</a></p>
-          <div id="chatgptSettingsContent">
-            <p class="loading-text">Loading ChatGPT Codex CLI settings...</p>
+
+          <!-- MCP Servers Section -->
+          <div id="chatgptMcpServers">
+            <p class="loading-text">Loading MCP servers...</p>
+          </div>
+
+          <!-- Raw Config Section -->
+          <div id="chatgptRawConfig" class="raw-config-section">
+            <p class="raw-config-label">Raw Config</p>
+            <div id="chatgptSettingsContent">
+              <p class="loading-text">Loading ChatGPT Codex CLI settings...</p>
+            </div>
           </div>
         </div>
 
@@ -273,6 +300,24 @@
           </div>
         </div>
 
+        </div>
+        <!-- End Agents and Tools Tab -->
+
+        <!-- Advanced Tab -->
+        <div class="settings-tab-content" id="advancedTab">
+
+        <div class="settings-section">
+          <h3 class="section-title">General</h3>
+          <div class="setting-item">
+            <label class="setting-label">
+              <span>Theme</span>
+              <select class="setting-select" id="themeSelect">
+                <option value="light" selected>Light</option>
+                <option value="dark">Dark</option>
+              </select>
+            </label>
+          </div>
+        </div>
 
         <div class="settings-section">
           <h3 class="section-title">Electron API Configuration</h3>
@@ -292,6 +337,9 @@
             </label>
           </div>
         </div>
+
+        </div>
+        <!-- End Advanced Tab -->
 
         <div class="settings-actions">
           <button class="settings-btn primary">Save Settings</button>

@@ -1249,10 +1249,12 @@ async function loadSettingsInfo() {
 // Load Gemini CLI settings
 async function loadGeminiSettings() {
   const geminiContent = document.getElementById('geminiSettingsContent');
+  const geminiMcpServers = document.getElementById('geminiMcpServers');
   if (!geminiContent) return;
 
   if (!window.electronAPI || !window.electronAPI.getGeminiSettings) {
     geminiContent.innerHTML = '<p class="loading-text">Gemini settings not available in this environment.</p>';
+    if (geminiMcpServers) geminiMcpServers.innerHTML = '';
     return;
   }
 
@@ -1260,11 +1262,17 @@ async function loadGeminiSettings() {
     const result = await window.electronAPI.getGeminiSettings();
 
     if (result.found) {
+      // Parse and display MCP servers
+      if (geminiMcpServers) {
+        renderMcpServers(result.settings, geminiMcpServers, 'gemini');
+      }
+
       // Display the settings as formatted JSON
       const jsonString = JSON.stringify(result.settings, null, 2);
       geminiContent.innerHTML = `<pre class="gemini-settings-json">${escapeHtml(jsonString)}</pre>`;
     } else {
       // Show installation message
+      if (geminiMcpServers) geminiMcpServers.innerHTML = '';
       geminiContent.innerHTML = `
         <div class="gemini-not-found">
           <p><strong>Gemini CLI not found</strong></p>
@@ -1277,16 +1285,19 @@ async function loadGeminiSettings() {
   } catch (error) {
     console.error('Failed to load Gemini settings:', error);
     geminiContent.innerHTML = '<p class="loading-text">Error loading Gemini settings.</p>';
+    if (geminiMcpServers) geminiMcpServers.innerHTML = '';
   }
 }
 
 // Load Claude CLI settings
 async function loadClaudeSettings() {
   const claudeContent = document.getElementById('claudeSettingsContent');
+  const claudeMcpServers = document.getElementById('claudeMcpServers');
   if (!claudeContent) return;
 
   if (!window.electronAPI || !window.electronAPI.getClaudeSettings) {
     claudeContent.innerHTML = '<p class="loading-text">Claude settings not available in this environment.</p>';
+    if (claudeMcpServers) claudeMcpServers.innerHTML = '';
     return;
   }
 
@@ -1294,11 +1305,17 @@ async function loadClaudeSettings() {
     const result = await window.electronAPI.getClaudeSettings();
 
     if (result.found) {
+      // Parse and display MCP servers
+      if (claudeMcpServers) {
+        renderMcpServers(result.settings, claudeMcpServers, 'claude');
+      }
+
       // Display the settings as formatted JSON
       const jsonString = JSON.stringify(result.settings, null, 2);
       claudeContent.innerHTML = `<pre class="gemini-settings-json">${escapeHtml(jsonString)}</pre>`;
     } else {
       // Show installation message
+      if (claudeMcpServers) claudeMcpServers.innerHTML = '';
       claudeContent.innerHTML = `
         <div class="gemini-not-found">
           <p><strong>Claude CLI not found</strong></p>
@@ -1310,16 +1327,19 @@ async function loadClaudeSettings() {
   } catch (error) {
     console.error('Failed to load Claude settings:', error);
     claudeContent.innerHTML = '<p class="loading-text">Error loading Claude settings.</p>';
+    if (claudeMcpServers) claudeMcpServers.innerHTML = '';
   }
 }
 
 // Load ChatGPT Codex CLI settings
 async function loadChatGPTSettings() {
   const chatgptContent = document.getElementById('chatgptSettingsContent');
+  const chatgptMcpServers = document.getElementById('chatgptMcpServers');
   if (!chatgptContent) return;
 
   if (!window.electronAPI || !window.electronAPI.getChatGPTSettings) {
     chatgptContent.innerHTML = '<p class="loading-text">ChatGPT Codex settings not available in this environment.</p>';
+    if (chatgptMcpServers) chatgptMcpServers.innerHTML = '';
     return;
   }
 
@@ -1327,6 +1347,13 @@ async function loadChatGPTSettings() {
     const result = await window.electronAPI.getChatGPTSettings();
 
     if (result.found) {
+      // Parse and display MCP servers (only if not TOML)
+      if (chatgptMcpServers && !result.isToml) {
+        renderMcpServers(result.settings, chatgptMcpServers, 'chatgpt');
+      } else if (chatgptMcpServers) {
+        chatgptMcpServers.innerHTML = '<p class="mcp-no-servers">MCP server parsing not supported for TOML format</p>';
+      }
+
       // Display the settings - handle TOML format
       if (result.isToml) {
         chatgptContent.innerHTML = `<pre class="gemini-settings-json">${escapeHtml(result.settings)}</pre>`;
@@ -1336,6 +1363,7 @@ async function loadChatGPTSettings() {
       }
     } else {
       // Show installation message
+      if (chatgptMcpServers) chatgptMcpServers.innerHTML = '';
       chatgptContent.innerHTML = `
         <div class="gemini-not-found">
           <p><strong>ChatGPT Codex CLI not found</strong></p>
@@ -1347,7 +1375,328 @@ async function loadChatGPTSettings() {
   } catch (error) {
     console.error('Failed to load ChatGPT Codex settings:', error);
     chatgptContent.innerHTML = '<p class="loading-text">Error loading ChatGPT Codex settings.</p>';
+    if (chatgptMcpServers) chatgptMcpServers.innerHTML = '';
   }
+}
+
+// Render MCP servers from settings
+function renderMcpServers(settings, container, agentType) {
+  // Try to find MCP servers in the settings
+  let mcpServers = null;
+
+  // Different agents store MCP servers in different places
+  if (agentType === 'gemini') {
+    mcpServers = settings.mcpServers || settings.mcp_servers;
+  } else if (agentType === 'claude') {
+    mcpServers = settings.mcpServers || settings.mcp_servers;
+  } else if (agentType === 'chatgpt') {
+    mcpServers = settings.mcpServers || settings.mcp_servers;
+  }
+
+  if (!mcpServers || Object.keys(mcpServers).length === 0) {
+    container.innerHTML = '<p class="mcp-no-servers">No MCP servers configured</p>';
+    return;
+  }
+
+  // Build HTML for MCP servers in card format
+  let html = '<div class="mcp-servers-container">';
+  html += '<h4 class="mcp-servers-title">MCP Servers</h4>';
+
+  let serverIndex = 0;
+  for (const [serverName, serverConfig] of Object.entries(mcpServers)) {
+    const serverId = `mcp-server-${agentType}-${serverIndex}`;
+
+    // Determine command/URL
+    let commandOrUrl = 'N/A';
+    if (serverConfig.command) {
+      const args = serverConfig.args || [];
+      commandOrUrl = args.length > 0 ? args.join(' ') : serverConfig.command;
+    } else if (serverConfig.url) {
+      commandOrUrl = serverConfig.url;
+    }
+
+    // Determine type (stdio, http, sse, etc.)
+    let type = 'stdio'; // default
+    if (serverConfig.type) {
+      type = serverConfig.type;
+    } else if (serverConfig.transport) {
+      type = serverConfig.transport.type || 'stdio';
+    }
+
+    // Determine transport info
+    let transportType = 'N/A';
+    let transportUrl = 'N/A';
+    if (serverConfig.transport) {
+      transportType = serverConfig.transport.type || 'N/A';
+      transportUrl = serverConfig.transport.url || 'N/A';
+    } else if (serverConfig.url) {
+      transportType = 'http';
+      transportUrl = serverConfig.url;
+    } else if (serverConfig.command) {
+      transportType = 'stdio';
+      transportUrl = 'N/A';
+    }
+
+    html += `
+      <div class="mcp-server-card" id="${serverId}">
+        <div class="mcp-server-header">
+          <div class="mcp-server-info">
+            <div class="mcp-server-name">${escapeHtml(serverName)}</div>
+            <div class="mcp-server-details">
+              <div class="mcp-server-detail">
+                <span class="mcp-server-detail-label">Command/URL:</span>
+                <span class="mcp-server-detail-value">${escapeHtml(commandOrUrl)}</span>
+              </div>
+              <div class="mcp-server-detail">
+                <span class="mcp-server-detail-label">Type:</span>
+                <span class="mcp-server-detail-value">${escapeHtml(type)}</span>
+              </div>
+              <div class="mcp-server-detail">
+                <span class="mcp-server-detail-label">Transport:</span>
+                <span class="mcp-server-detail-value">${escapeHtml(transportType)}${transportUrl !== 'N/A' ? ' - ' + escapeHtml(transportUrl) : ''}</span>
+              </div>
+            </div>
+          </div>
+          <div class="mcp-server-actions">
+            <button class="mcp-test-btn" onclick="testMcpServer('${escapeHtml(serverName)}', ${escapeHtml(JSON.stringify(serverConfig))}, '${serverId}')">
+              <span class="mcp-test-btn-text">Testing...</span>
+            </button>
+          </div>
+        </div>
+        <div class="mcp-test-result-container"></div>
+        <div class="mcp-tools-container" style="display: none;">
+          <div class="mcp-tools-header">
+            <a href="#" class="mcp-tools-toggle" onclick="toggleMcpTools('${serverId}'); return false;">Show Tools</a>
+          </div>
+          <div class="mcp-tools-content" style="display: none;"></div>
+        </div>
+      </div>
+    `;
+
+    serverIndex++;
+  }
+
+  html += '</div>';
+  container.innerHTML = html;
+
+  // Auto-test all servers
+  serverIndex = 0;
+  for (const [serverName, serverConfig] of Object.entries(mcpServers)) {
+    const serverId = `mcp-server-${agentType}-${serverIndex}`;
+    testMcpServer(serverName, serverConfig, serverId);
+    serverIndex++;
+  }
+}
+
+// Test an MCP server and list tools
+async function testMcpServer(serverName, serverConfig, serverId) {
+  const serverCard = document.getElementById(serverId);
+  if (!serverCard) return;
+
+  const resultContainer = serverCard.querySelector('.mcp-test-result-container');
+  const toolsContainer = serverCard.querySelector('.mcp-tools-container');
+  const toolsContent = serverCard.querySelector('.mcp-tools-content');
+  const button = serverCard.querySelector('.mcp-test-btn');
+  const buttonText = button.querySelector('.mcp-test-btn-text');
+
+  // Update button state
+  button.disabled = true;
+  buttonText.textContent = 'Testing...';
+
+  try {
+    // Check if this is a transport-based server
+    if (serverConfig.transport && serverConfig.transport.type === 'sse') {
+      // For SSE servers, test with a simple HTTP request
+      const url = serverConfig.transport.url;
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'text/event-stream'
+        }
+      });
+
+      if (response.ok) {
+        resultContainer.innerHTML = `
+          <div class="mcp-test-result success">
+✓ SSE server connected
+          </div>
+        `;
+        buttonText.textContent = '✓ Connected';
+        button.classList.add('success');
+
+        // For SSE servers, we can't easily list tools, so just show success
+        toolsContainer.style.display = 'none';
+      } else {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      return;
+    }
+
+    // For stdio servers - initialize and list tools
+    const command = serverConfig.command;
+    const args = serverConfig.args || [];
+
+    if (!command) {
+      throw new Error('No command specified for MCP server');
+    }
+
+    // Step 1: Initialize
+    const initRequest = JSON.stringify({
+      jsonrpc: "2.0",
+      id: 1,
+      method: "initialize",
+      params: {
+        protocolVersion: "2024-11-05",
+        capabilities: {},
+        clientInfo: {
+          name: "ai-agent-tester",
+          version: "1.0.0"
+        }
+      }
+    });
+
+    // Step 2: List tools
+    const listToolsRequest = JSON.stringify({
+      jsonrpc: "2.0",
+      id: 2,
+      method: "tools/list",
+      params: {}
+    });
+
+    // Combine both requests
+    const fullCommand = `(echo '${initRequest}' && echo '${listToolsRequest}') | ${command} ${args.join(' ')}`;
+
+    const response = await fetch(`${API_BASE_URL}/execute-custom`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        command: fullCommand,
+        processId: `mcp-test-${Date.now()}`
+      })
+    });
+
+    const result = await response.json();
+
+    if (result.success && result.stdout) {
+      // Parse JSON responses
+      const lines = result.stdout.split('\n').filter(line => line.trim());
+      let initResponse = null;
+      let toolsResponse = null;
+
+      // Try to find both responses
+      for (const line of lines) {
+        try {
+          const json = JSON.parse(line);
+          if (json.id === 1) initResponse = json;
+          if (json.id === 2) toolsResponse = json;
+        } catch (e) {
+          // Skip non-JSON lines
+        }
+      }
+
+      if (initResponse && initResponse.result) {
+        const serverInfo = initResponse.result.serverInfo || {};
+        resultContainer.innerHTML = `
+          <div class="mcp-test-result success">
+✓ ${serverInfo.name || serverName} v${serverInfo.version || '?'}
+          </div>
+        `;
+        buttonText.textContent = '✓ Connected';
+        button.classList.add('success');
+
+        // Show tools if available
+        if (toolsResponse && toolsResponse.result && toolsResponse.result.tools) {
+          const tools = toolsResponse.result.tools;
+          if (tools.length > 0) {
+            toolsContainer.style.display = 'block';
+
+            // Build tools table
+            let toolsHtml = '<table class="mcp-tools-table">';
+            toolsHtml += '<thead><tr><th>Tool Name</th><th>Description</th><th>Parameters</th></tr></thead>';
+            toolsHtml += '<tbody>';
+
+            for (const tool of tools) {
+              const params = tool.inputSchema && tool.inputSchema.properties
+                ? Object.keys(tool.inputSchema.properties).join(', ')
+                : 'None';
+
+              toolsHtml += `<tr>`;
+              toolsHtml += `<td class="mcp-tool-name">${escapeHtml(tool.name)}</td>`;
+              toolsHtml += `<td class="mcp-tool-description">${escapeHtml(tool.description || 'No description')}</td>`;
+              toolsHtml += `<td class="mcp-tool-params">${escapeHtml(params)}</td>`;
+              toolsHtml += `</tr>`;
+            }
+
+            toolsHtml += '</tbody></table>';
+            toolsContent.innerHTML = toolsHtml;
+          }
+        }
+      } else {
+        throw new Error('Invalid response from server');
+      }
+    } else {
+      const errorMsg = result.error || result.stderr || 'Unknown error';
+      throw new Error(errorMsg);
+    }
+  } catch (error) {
+    resultContainer.innerHTML = `
+      <div class="mcp-test-result error">
+✗ ${escapeHtml(error.message)}
+      </div>
+    `;
+    buttonText.textContent = '✗ Failed';
+    button.classList.add('error');
+    toolsContainer.style.display = 'none';
+  } finally {
+    button.disabled = false;
+  }
+}
+
+// Toggle MCP tools visibility
+function toggleMcpTools(serverId) {
+  const serverCard = document.getElementById(serverId);
+  if (!serverCard) return;
+
+  const toolsContent = serverCard.querySelector('.mcp-tools-content');
+  const toolsToggle = serverCard.querySelector('.mcp-tools-toggle');
+
+  if (toolsContent.style.display === 'none') {
+    toolsContent.style.display = 'block';
+    toolsToggle.textContent = 'Hide Tools';
+  } else {
+    toolsContent.style.display = 'none';
+    toolsToggle.textContent = 'Show Tools';
+  }
+}
+
+// Make functions available globally
+window.testMcpServer = testMcpServer;
+window.toggleMcpTools = toggleMcpTools;
+
+// Switch settings tabs
+function switchSettingsTab(tabName) {
+  // Update tab buttons
+  const tabs = document.querySelectorAll('.settings-tab');
+  tabs.forEach(tab => {
+    if (tab.dataset.tab === tabName) {
+      tab.classList.add('active');
+    } else {
+      tab.classList.remove('active');
+    }
+  });
+
+  // Update tab content
+  const tabContents = document.querySelectorAll('.settings-tab-content');
+  tabContents.forEach(content => {
+    if (content.id === `${tabName}Tab`) {
+      content.classList.add('active');
+    } else {
+      content.classList.remove('active');
+    }
+  });
 }
 
 // Check CLI versions and update pills
@@ -1422,6 +1771,15 @@ function setupEventListeners() {
     item.addEventListener('click', () => {
       const viewName = item.dataset.view;
       switchView(viewName);
+    });
+  });
+
+  // Settings tabs
+  const settingsTabs = document.querySelectorAll('.settings-tab');
+  settingsTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const tabName = tab.dataset.tab;
+      switchSettingsTab(tabName);
     });
   });
 

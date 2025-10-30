@@ -322,18 +322,39 @@ ipcMain.handle('get-gemini-settings', async () => {
   try {
     const homeDir = os.homedir();
     const geminiSettingsPath = path.join(homeDir, '.gemini', 'settings.json');
+    const geminiMcpSettingsPath = path.join(homeDir, 'Library', 'Application Support', 'Google', 'Gemini Desktop', 'mcp_settings.json');
 
-    // Check if file exists
+    let settings = {};
+    let foundSettings = false;
+
+    // Check if main settings file exists
     try {
       await fs.access(geminiSettingsPath);
+      const fileContent = await fs.readFile(geminiSettingsPath, 'utf-8');
+      settings = JSON.parse(fileContent);
+      foundSettings = true;
     } catch (error) {
-      // File doesn't exist
-      return { found: false };
+      // Main settings file doesn't exist, continue
     }
 
-    // Read and parse the file
-    const fileContent = await fs.readFile(geminiSettingsPath, 'utf-8');
-    const settings = JSON.parse(fileContent);
+    // Check if MCP settings file exists and merge it
+    try {
+      await fs.access(geminiMcpSettingsPath);
+      const mcpFileContent = await fs.readFile(geminiMcpSettingsPath, 'utf-8');
+      const mcpSettings = JSON.parse(mcpFileContent);
+
+      // Merge MCP settings into main settings
+      if (mcpSettings.mcpServers) {
+        settings.mcpServers = mcpSettings.mcpServers;
+        foundSettings = true;
+      }
+    } catch (error) {
+      // MCP settings file doesn't exist, continue
+    }
+
+    if (!foundSettings) {
+      return { found: false };
+    }
 
     return { found: true, settings };
   } catch (error) {

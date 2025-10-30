@@ -49,9 +49,13 @@ function createWindow() {
 
   mainWindow.loadFile('renderer/index.html');
 
-  // Open external links in the default browser
+  // Open external links in the default browser and handle vscode:// protocol
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     if (url.startsWith('http://') || url.startsWith('https://')) {
+      shell.openExternal(url);
+      return { action: 'deny' };
+    }
+    if (url.startsWith('vscode://')) {
       shell.openExternal(url);
       return { action: 'deny' };
     }
@@ -238,6 +242,14 @@ ipcMain.handle('restart-app', () => {
   console.log('🔄 Restarting app...');
   app.relaunch();
   app.exit(0);
+});
+
+ipcMain.handle('expand-path', (_event, filePath) => {
+  // Expand tilde to home directory
+  if (filePath.startsWith('~')) {
+    return path.join(os.homedir(), filePath.slice(1));
+  }
+  return filePath;
 });
 
 ipcMain.handle('get-gemini-settings', async () => {

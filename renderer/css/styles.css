@@ -958,6 +958,30 @@ body {
   color: #1d1d1f;
 }
 
+.vscode-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 8px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #007aff;
+  text-decoration: none;
+  background-color: rgba(0, 122, 255, 0.08);
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.vscode-link:hover {
+  background-color: rgba(0, 122, 255, 0.15);
+  text-decoration: none;
+}
+
+.vscode-link:active {
+  transform: scale(0.95);
+}
+
 .setting-item {
   margin-bottom: 16px;
 }
@@ -1505,6 +1529,15 @@ body.dark-theme .section-description {
 body.dark-theme .section-description code {
   background-color: #2d2d2d;
   color: #e5e5e7;
+}
+
+body.dark-theme .vscode-link {
+  color: #0a84ff;
+  background-color: rgba(10, 132, 255, 0.15);
+}
+
+body.dark-theme .vscode-link:hover {
+  background-color: rgba(10, 132, 255, 0.25);
 }
 
 body.dark-theme .setting-label {

@@ -1307,6 +1307,24 @@ async function loadChatGPTSettings() {
   }
 }
 
+// Open file in VS Code
+async function openInVSCode(filePath) {
+  try {
+    // Expand tilde to home directory using IPC
+    const expandedPath = await window.electronAPI.expandPath(filePath);
+
+    // Create vscode:// URL - VS Code will handle opening the file
+    const vscodeUrl = `vscode://file${expandedPath}`;
+
+    console.log(`Opening file in VS Code: ${vscodeUrl}`);
+
+    // Use window.open to trigger the vscode:// protocol
+    window.open(vscodeUrl, '_blank');
+  } catch (error) {
+    console.error('Failed to open file in VS Code:', error);
+    updateStatus('Failed to open file in VS Code');
+  }
+}
 
 
 // Setup event listeners
@@ -1459,6 +1477,17 @@ function setupEventListeners() {
   if (stopMcpBtn) {
     stopMcpBtn.addEventListener('click', stopMcpServer);
   }
+
+  // VS Code links - delegate event listener for dynamically added links
+  document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('vscode-link')) {
+      e.preventDefault();
+      const filePath = e.target.getAttribute('data-file');
+      if (filePath) {
+        openInVSCode(filePath);
+      }
+    }
+  });
 }
 
 

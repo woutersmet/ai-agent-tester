@@ -9,6 +9,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getGeminiSettings: () => ipcRenderer.invoke('get-gemini-settings'),
   getClaudeSettings: () => ipcRenderer.invoke('get-claude-settings'),
   getChatGPTSettings: () => ipcRenderer.invoke('get-chatgpt-settings'),
+  startMcpServer: () => ipcRenderer.invoke('start-mcp-server'),
+  stopMcpServer: () => ipcRenderer.invoke('stop-mcp-server'),
+  getMcpServerStatus: () => ipcRenderer.invoke('get-mcp-server-status'),
   onNewSession: (callback) => ipcRenderer.on('new-session', callback)
 });
 

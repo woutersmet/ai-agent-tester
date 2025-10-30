@@ -1057,6 +1057,115 @@ async function loadHelpInfo() {
   if (nodeVersionEl) {
     nodeVersionEl.textContent = 'v20.x (via Electron)';
   }
+
+  // Load MCP server status
+  await updateMcpServerStatus();
+}
+
+// Update MCP server status
+async function updateMcpServerStatus() {
+  if (!window.electronAPI || !window.electronAPI.getMcpServerStatus) {
+    return;
+  }
+
+  try {
+    const status = await window.electronAPI.getMcpServerStatus();
+    const statusEl = document.getElementById('mcpServerStatus');
+    const startBtn = document.getElementById('startMcpBtn');
+    const stopBtn = document.getElementById('stopMcpBtn');
+    const configSection = document.getElementById('mcpConfigSection');
+    const configCode = document.getElementById('mcpConfigCode');
+
+    if (status.running) {
+      statusEl.textContent = 'Running';
+      statusEl.className = 'mcp-status-text running';
+      startBtn.disabled = true;
+      stopBtn.disabled = false;
+
+      // Show configuration with actual path
+      if (configSection && configCode) {
+        const config = {
+          "mcpServers": {
+            "famous-quotes": {
+              "command": "node",
+              "args": [status.path],
+              "env": {}
+            }
+          }
+        };
+        configCode.textContent = JSON.stringify(config, null, 2);
+        configSection.classList.remove('hidden');
+      }
+    } else {
+      statusEl.textContent = 'Stopped';
+      statusEl.className = 'mcp-status-text stopped';
+      startBtn.disabled = false;
+      stopBtn.disabled = true;
+
+      // Hide configuration when stopped
+      if (configSection) {
+        configSection.classList.add('hidden');
+      }
+    }
+  } catch (error) {
+    console.error('Failed to get MCP server status:', error);
+  }
+}
+
+// Start MCP server
+async function startMcpServer() {
+  if (!window.electronAPI || !window.electronAPI.startMcpServer) {
+    return;
+  }
+
+  const statusEl = document.getElementById('mcpServerStatus');
+  statusEl.textContent = 'Starting...';
+  statusEl.className = 'mcp-status-text';
+
+  try {
+    const result = await window.electronAPI.startMcpServer();
+
+    if (result.success) {
+      await updateMcpServerStatus();
+      updateStatus('MCP server started successfully');
+    } else {
+      statusEl.textContent = 'Failed to start';
+      statusEl.className = 'mcp-status-text stopped';
+      updateStatus(`Failed to start MCP server: ${result.error}`);
+    }
+  } catch (error) {
+    console.error('Failed to start MCP server:', error);
+    statusEl.textContent = 'Error';
+    statusEl.className = 'mcp-status-text stopped';
+    updateStatus('Error starting MCP server');
+  }
+}
+
+// Stop MCP server
+async function stopMcpServer() {
+  if (!window.electronAPI || !window.electronAPI.stopMcpServer) {
+    return;
+  }
+
+  const statusEl = document.getElementById('mcpServerStatus');
+  statusEl.textContent = 'Stopping...';
+  statusEl.className = 'mcp-status-text';
+
+  try {
+    const result = await window.electronAPI.stopMcpServer();
+
+    if (result.success) {
+      await updateMcpServerStatus();
+      updateStatus('MCP server stopped');
+    } else {
+      updateStatus(`Failed to stop MCP server: ${result.error}`);
+      await updateMcpServerStatus();
+    }
+  } catch (error) {
+    console.error('Failed to stop MCP server:', error);
+    updateStatus('Error stopping MCP server');
+    await updateMcpServerStatus();
+  }
 }
 
 // Load settings information
@@ -1335,6 +1444,18 @@ function setupEventListeners() {
       updateStatus('Failed to restart');
     }
   });
+
+  // MCP Server buttons
+  const startMcpBtn = document.getElementById('startMcpBtn');
+  const stopMcpBtn = document.getElementById('stopMcpBtn');
+
+  if (startMcpBtn) {
+    startMcpBtn.addEventListener('click', startMcpServer);
+  }
+
+  if (stopMcpBtn) {
+    stopMcpBtn.addEventListener('click', stopMcpServer);
+  }
 }
 
 

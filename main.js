@@ -2,6 +2,7 @@ const { app, BrowserWindow, ipcMain, nativeImage, Menu, shell } = require('elect
 const path = require('path');
 const fs = require('fs').promises;
 const os = require('os');
+const { spawn } = require('child_process');
 const expressApp = require('./server/app');
 
 // Detect if running in development mode (must be done early, before app is ready)
@@ -307,6 +308,124 @@ ipcMain.handle('get-chatgpt-settings', async () => {
   } catch (error) {
     console.error('Error reading ChatGPT Codex settings:', error);
     return { found: false, error: error.message };
+  }
+});
+
+// MCP Server Management
+let mcpServerProcess = null;
+let mcpServerPort = null;
+
+// Start the Famous Quotes MCP Server
+ipcMain.handle('start-mcp-server', async () => {
+  try {
+    if (mcpServerProcess) {
+      return { success: false, error: 'MCP server is already running', port: mcpServerPort };
+    }
+
+    const mcpServerPath = path.join(__dirname, 'mcp-servers', 'famous-quotes', 'famous-quotes-mcp-server.js');
+
+    // Check if the server file exists
+    try {
+      await fs.access(mcpServerPath);
+    } catch (error) {
+      return { success: false, error: 'MCP server file not found' };
+    }
+
+    // Start the MCP server process
+    mcpServerProcess = spawn('node', [mcpServerPath], {
+      cwd: path.join(__dirname, 'mcp-servers', 'famous-quotes'),
+      stdio: ['pipe', 'pipe', 'pipe']
+    });
+
+    let serverOutput = '';
+    let serverError = '';
+
+    mcpServerProcess.stdout.on('data', (data) => {
+      serverOutput += data.toString();
+      console.log('[MCP Server]:', data.toString());
+    });
+
+    mcpServerProcess.stderr.on('data', (data) => {
+      serverError += data.toString();
+      console.error('[MCP Server Error]:', data.toString());
+    });
+
+    mcpServerProcess.on('close', (code) => {
+      console.log(`[MCP Server] Process exited with code ${code}`);
+      mcpServerProcess = null;
+      mcpServerPort = null;
+    });
+
+    mcpServerProcess.on('error', (error) => {
+      console.error('[MCP Server] Failed to start:', error);
+      mcpServerProcess = null;
+      mcpServerPort = null;
+    });
+
+    // Give it a moment to start
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    if (mcpServerProcess && !mcpServerProcess.killed) {
+      // Get the absolute path for configuration
+      const absolutePath = mcpServerPath;
+
+      return {
+        success: true,
+        message: 'MCP server started successfully',
+        path: absolutePath,
+        pid: mcpServerProcess.pid
+      };
+    } else {
+      return { success: false, error: 'MCP server failed to start', stderr: serverError };
+    }
+  } catch (error) {
+    console.error('Error starting MCP server:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+// Stop the Famous Quotes MCP Server
+ipcMain.handle('stop-mcp-server', async () => {
+  try {
+    if (!mcpServerProcess) {
+      return { success: false, error: 'MCP server is not running' };
+    }
+
+    mcpServerProcess.kill('SIGTERM');
+
+    // Wait a bit for graceful shutdown
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Force kill if still running
+    if (mcpServerProcess && !mcpServerProcess.killed) {
+      mcpServerProcess.kill('SIGKILL');
+    }
+
+    mcpServerProcess = null;
+    mcpServerPort = null;
+
+    return { success: true, message: 'MCP server stopped successfully' };
+  } catch (error) {
+    console.error('Error stopping MCP server:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+// Get MCP Server status
+ipcMain.handle('get-mcp-server-status', async () => {
+  const isRunning = mcpServerProcess !== null && !mcpServerProcess.killed;
+
+  if (isRunning) {
+    const mcpServerPath = path.join(__dirname, 'mcp-servers', 'famous-quotes', 'famous-quotes-mcp-server.js');
+    return {
+      running: true,
+      pid: mcpServerProcess.pid,
+      path: mcpServerPath
+    };
+  } else {
+    return {
+      running: false
+    };
   }
 });
 

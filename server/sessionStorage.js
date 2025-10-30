@@ -129,7 +129,8 @@ async function initialize() {
     console.log('✅ ai-agent-runner-sessions-history initialized with starter data');
   } catch (error) {
     console.error('❌ Error initializing ai-agent-runner-sessions-history:', error);
-    throw error;
+    console.error('   This may cause issues with session storage.');
+    // Don't throw - allow the app to continue, sessions just won't persist
   }
 }
 

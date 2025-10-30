@@ -263,6 +263,10 @@ ipcMain.handle('get-app-path', () => {
   return app.getAppPath();
 });
 
+ipcMain.handle('get-server-port', () => {
+  return PORT;
+});
+
 ipcMain.handle('restart-app', () => {
   console.log('🔄 Restarting app...');
   app.relaunch();

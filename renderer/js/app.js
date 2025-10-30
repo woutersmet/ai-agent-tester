@@ -13,7 +13,7 @@ import {
 } from './ui-utils.js';
 
 // API Configuration
-const API_BASE_URL = 'http://localhost:3000/api';
+let API_BASE_URL = 'http://localhost:3000/api'; // Default, will be updated
 
 // State
 let currentSessionId = null;
@@ -60,6 +60,17 @@ const navItems = document.querySelectorAll('.nav-item');
 // Initialize app
 async function init() {
   console.log('Initializing AI Agent Tester...');
+
+  // Get the server port from Electron
+  if (window.electronAPI && window.electronAPI.getServerPort) {
+    try {
+      const port = await window.electronAPI.getServerPort();
+      API_BASE_URL = `http://localhost:${port}/api`;
+      console.log(`Using API at ${API_BASE_URL}`);
+    } catch (error) {
+      console.error('Failed to get server port, using default:', error);
+    }
+  }
 
   // Load theme preference first (before rendering)
   loadThemePreference();

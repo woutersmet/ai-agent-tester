@@ -29,8 +29,13 @@ app.use(express.json());
 
 // Middleware to ensure session storage is initialized
 async function ensureSessionStorage(req, res, next) {
-  await initializeSessionStorage();
-  next();
+  try {
+    await initializeSessionStorage();
+    next();
+  } catch (error) {
+    console.error('Error initializing session storage:', error);
+    res.status(500).json({ error: 'Failed to initialize session storage', details: error.message });
+  }
 }
 
 // Track running processes for cancellation

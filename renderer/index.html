@@ -233,6 +233,40 @@
           </div>
         </div>
 
+        <div class="settings-section">
+          <h3 class="section-title">Example MCP Server</h3>
+          <p class="section-description">
+            This app includes a sample MCP (Model Context Protocol) server called "Famous Quotes" that you can use to test MCP integration with your AI agents.
+            Start the server below and add the configuration to your agent's settings.
+          </p>
+
+          <div class="mcp-server-controls">
+            <div class="mcp-status">
+              <span class="mcp-status-label">Status:</span>
+              <span id="mcpServerStatus" class="mcp-status-text">Checking...</span>
+            </div>
+            <div class="mcp-buttons">
+              <button id="startMcpBtn" class="mcp-btn primary">Start Server</button>
+              <button id="stopMcpBtn" class="mcp-btn secondary" disabled>Stop Server</button>
+            </div>
+          </div>
+
+          <p class="section-description">
+            <strong>Available Tools:</strong> search_quotes, list_all_quotes, get_random_quote, list_authors
+          </p>
+
+          <div id="mcpConfigSection" class="hidden">
+            <p class="section-description">
+              <strong>Configuration:</strong> Add this to your agent's MCP settings:
+            </p>
+            <pre id="mcpConfigCode" class="settings-code"></pre>
+            <p class="section-description">
+              <strong>For Gemini:</strong> Add to <code>~/Library/Application Support/Google/Gemini Desktop/mcp_settings.json</code><br>
+              <strong>For Claude:</strong> Add to <code>~/.claude.json</code> under the <code>mcpServers</code> key
+            </p>
+          </div>
+        </div>
+
         <div class="settings-actions">
           <button class="settings-btn primary">Save Settings</button>
           <button class="settings-btn">Reset to Defaults</button>
@@ -281,37 +315,14 @@
           <div class="help-icon">
             <i data-lucide="package" class="help-icon-svg"></i>
           </div>
-          <h3 class="section-title">Included MCP Server: Famous Quotes</h3>
+          <h3 class="section-title">Example MCP Server</h3>
           <p class="help-text">
-            This app includes a sample MCP (Model Context Protocol) server that provides access to famous quotes.
-            You can start it directly from this app and configure your AI agents to use it.
+            This app includes a sample MCP (Model Context Protocol) server called "Famous Quotes" that provides access to famous quotes.
+            You can start/stop it and configure your AI agents to use it from the <strong>Settings</strong> page.
           </p>
-
-          <div class="mcp-server-controls">
-            <div class="mcp-status">
-              <span class="mcp-status-label">Status:</span>
-              <span id="mcpServerStatus" class="mcp-status-text">Checking...</span>
-            </div>
-            <div class="mcp-buttons">
-              <button id="startMcpBtn" class="mcp-btn primary">Start Server</button>
-              <button id="stopMcpBtn" class="mcp-btn secondary" disabled>Stop Server</button>
-            </div>
-          </div>
-
           <p class="help-text">
-            <strong>Available Tools:</strong> search_quotes, list_all_quotes, get_random_quote, list_authors
+            Go to Settings → Example MCP Server to manage the server and get configuration instructions.
           </p>
-
-          <div id="mcpConfigSection" class="hidden">
-            <p class="help-text">
-              <strong>Configuration:</strong> Add this to your agent's MCP settings:
-            </p>
-            <pre id="mcpConfigCode" class="help-code"></pre>
-            <p class="help-text">
-              <strong>For Gemini:</strong> Add to <code>~/Library/Application Support/Google/Gemini Desktop/mcp_settings.json</code><br>
-              <strong>For Claude:</strong> Add to <code>~/.claude.json</code> under the <code>mcpServers</code> key
-            </p>
-          </div>
         </div>
 
         <div class="help-section">

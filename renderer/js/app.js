@@ -1196,6 +1196,9 @@ async function loadSettingsInfo() {
   // Load ChatGPT settings
   await loadChatGPTSettings();
 
+  // Load MCP server status
+  await updateMcpServerStatus();
+
   // Load saved theme preference
   loadThemePreference();
 }

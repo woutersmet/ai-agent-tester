@@ -290,7 +290,7 @@ ipcMain.handle('get-claude-settings', async () => {
 ipcMain.handle('get-chatgpt-settings', async () => {
   try {
     const homeDir = os.homedir();
-    const chatgptSettingsPath = path.join(homeDir, '.chatgpt', 'settings.json');
+    const chatgptSettingsPath = path.join(homeDir, '.codex', 'config.toml');
 
     // Check if file exists
     try {
@@ -300,13 +300,12 @@ ipcMain.handle('get-chatgpt-settings', async () => {
       return { found: false };
     }
 
-    // Read and parse the file
+    // Read the TOML file (return as plain text since we don't have a TOML parser)
     const fileContent = await fs.readFile(chatgptSettingsPath, 'utf-8');
-    const settings = JSON.parse(fileContent);
 
-    return { found: true, settings };
+    return { found: true, settings: fileContent, isToml: true };
   } catch (error) {
-    console.error('Error reading ChatGPT settings:', error);
+    console.error('Error reading ChatGPT Codex settings:', error);
     return { found: false, error: error.message };
   }
 });

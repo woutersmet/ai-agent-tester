@@ -1158,13 +1158,13 @@ async function loadClaudeSettings() {
   }
 }
 
-// Load ChatGPT CLI settings
+// Load ChatGPT Codex CLI settings
 async function loadChatGPTSettings() {
   const chatgptContent = document.getElementById('chatgptSettingsContent');
   if (!chatgptContent) return;
 
   if (!window.electronAPI || !window.electronAPI.getChatGPTSettings) {
-    chatgptContent.innerHTML = '<p class="loading-text">ChatGPT settings not available in this environment.</p>';
+    chatgptContent.innerHTML = '<p class="loading-text">ChatGPT Codex settings not available in this environment.</p>';
     return;
   }
 
@@ -1172,22 +1172,26 @@ async function loadChatGPTSettings() {
     const result = await window.electronAPI.getChatGPTSettings();
 
     if (result.found) {
-      // Display the settings as formatted JSON
-      const jsonString = JSON.stringify(result.settings, null, 2);
-      chatgptContent.innerHTML = `<pre class="gemini-settings-json">${escapeHtml(jsonString)}</pre>`;
+      // Display the settings - handle TOML format
+      if (result.isToml) {
+        chatgptContent.innerHTML = `<pre class="gemini-settings-json">${escapeHtml(result.settings)}</pre>`;
+      } else {
+        const jsonString = JSON.stringify(result.settings, null, 2);
+        chatgptContent.innerHTML = `<pre class="gemini-settings-json">${escapeHtml(jsonString)}</pre>`;
+      }
     } else {
       // Show installation message
       chatgptContent.innerHTML = `
         <div class="gemini-not-found">
-          <p><strong>ChatGPT CLI not found</strong></p>
-          <p>It looks like the ChatGPT CLI hasn't been installed yet or the settings file doesn't exist.</p>
-          <p>Settings should be located at: <code>~/.chatgpt/settings.json</code></p>
+          <p><strong>ChatGPT Codex CLI not found</strong></p>
+          <p>It looks like the ChatGPT Codex CLI hasn't been installed yet or the settings file doesn't exist.</p>
+          <p>Settings should be located at: <code>~/.codex/config.toml</code></p>
         </div>
       `;
     }
   } catch (error) {
-    console.error('Failed to load ChatGPT settings:', error);
-    chatgptContent.innerHTML = '<p class="loading-text">Error loading ChatGPT settings.</p>';
+    console.error('Failed to load ChatGPT Codex settings:', error);
+    chatgptContent.innerHTML = '<p class="loading-text">Error loading ChatGPT Codex settings.</p>';
   }
 }
 

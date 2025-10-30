@@ -1187,6 +1187,9 @@ async function loadSettingsInfo() {
     nodeVersionEl.textContent = 'v20.x (via Electron)';
   }
 
+  // Check CLI versions
+  await checkCliVersions();
+
   // Load Gemini settings
   await loadGeminiSettings();
 
@@ -1304,6 +1307,51 @@ async function loadChatGPTSettings() {
   } catch (error) {
     console.error('Failed to load ChatGPT Codex settings:', error);
     chatgptContent.innerHTML = '<p class="loading-text">Error loading ChatGPT Codex settings.</p>';
+  }
+}
+
+// Check CLI versions and update pills
+async function checkCliVersions() {
+  // Check Claude version
+  checkCliVersion('claude', 'claudeVersionPill', window.electronAPI.checkClaudeVersion);
+
+  // Check Gemini version
+  checkCliVersion('gemini', 'geminiVersionPill', window.electronAPI.checkGeminiVersion);
+
+  // Check Codex version
+  checkCliVersion('codex', 'codexVersionPill', window.electronAPI.checkCodexVersion);
+}
+
+async function checkCliVersion(cliName, pillId, checkFunction) {
+  const pill = document.getElementById(pillId);
+  if (!pill) return;
+
+  if (!window.electronAPI || !checkFunction) {
+    pill.classList.remove('checking');
+    pill.classList.add('not-installed');
+    pill.querySelector('.version-text').textContent = 'Not available';
+    return;
+  }
+
+  try {
+    const result = await checkFunction();
+
+    pill.classList.remove('checking');
+
+    if (result.installed) {
+      pill.classList.add('installed');
+      pill.classList.remove('not-installed');
+      pill.querySelector('.version-text').textContent = result.version;
+    } else {
+      pill.classList.add('not-installed');
+      pill.classList.remove('installed');
+      pill.querySelector('.version-text').textContent = 'Not installed';
+    }
+  } catch (error) {
+    console.error(`Failed to check ${cliName} version:`, error);
+    pill.classList.remove('checking');
+    pill.classList.add('not-installed');
+    pill.querySelector('.version-text').textContent = 'Error';
   }
 }
 

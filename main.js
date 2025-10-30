@@ -2,7 +2,7 @@ const { app, BrowserWindow, ipcMain, nativeImage, Menu, shell } = require('elect
 const path = require('path');
 const fs = require('fs').promises;
 const os = require('os');
-const { spawn } = require('child_process');
+const { spawn, exec } = require('child_process');
 const expressApp = require('./server/app');
 
 // Detect if running in development mode (must be done early, before app is ready)
@@ -321,6 +321,35 @@ ipcMain.handle('get-chatgpt-settings', async () => {
     console.error('Error reading ChatGPT Codex settings:', error);
     return { found: false, error: error.message };
   }
+});
+
+// CLI Version Checks
+function execCommand(command) {
+  return new Promise((resolve) => {
+    exec(command, (error, stdout) => {
+      if (error) {
+        resolve({ installed: false, version: null, error: error.message });
+      } else {
+        resolve({ installed: true, version: stdout.trim(), error: null });
+      }
+    });
+  });
+}
+
+ipcMain.handle('check-claude-version', async () => {
+  return await execCommand('claude --version');
+});
+
+ipcMain.handle('check-gemini-version', async () => {
+  return await execCommand('gemini --version');
+});
+
+ipcMain.handle('check-codex-version', async () => {
+  return await execCommand('codex --version');
+});
+
+ipcMain.handle('check-chatgpt-version', async () => {
+  return await execCommand('chatgpt --version');
 });
 
 // MCP Server Management

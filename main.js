@@ -355,11 +355,37 @@ ipcMain.handle('get-chatgpt-settings', async () => {
 // CLI Version Checks
 function execCommand(command) {
   return new Promise((resolve) => {
-    exec(command, (error, stdout) => {
+    // Get user's shell PATH by running a login shell
+    // This ensures we have access to all the user's installed CLI tools
+    const shellCommand = process.platform === 'darwin'
+      ? `source ~/.zshrc 2>/dev/null || source ~/.bash_profile 2>/dev/null || source ~/.bashrc 2>/dev/null; ${command}`
+      : command;
+
+    const execOptions = {
+      shell: process.platform === 'darwin' ? '/bin/zsh' : true,
+      env: {
+        ...process.env,
+        // Add common paths where CLI tools might be installed
+        PATH: [
+          process.env.PATH,
+          '/usr/local/bin',
+          '/opt/homebrew/bin',
+          '/usr/bin',
+          '/bin',
+          `${os.homedir()}/.local/bin`,
+          `${os.homedir()}/bin`
+        ].filter(Boolean).join(':')
+      }
+    };
+
+    exec(shellCommand, execOptions, (error, stdout, stderr) => {
       if (error) {
+        console.log(`Command "${command}" failed:`, error.message);
         resolve({ installed: false, version: null, error: error.message });
       } else {
-        resolve({ installed: true, version: stdout.trim(), error: null });
+        const version = stdout.trim();
+        console.log(`Command "${command}" succeeded:`, version);
+        resolve({ installed: true, version: version, error: null });
       }
     });
   });

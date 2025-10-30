@@ -263,3 +263,51 @@ ipcMain.handle('get-gemini-settings', async () => {
   }
 });
 
+ipcMain.handle('get-claude-settings', async () => {
+  try {
+    const homeDir = os.homedir();
+    const claudeSettingsPath = path.join(homeDir, '.claude.json');
+
+    // Check if file exists
+    try {
+      await fs.access(claudeSettingsPath);
+    } catch (error) {
+      // File doesn't exist
+      return { found: false };
+    }
+
+    // Read and parse the file
+    const fileContent = await fs.readFile(claudeSettingsPath, 'utf-8');
+    const settings = JSON.parse(fileContent);
+
+    return { found: true, settings };
+  } catch (error) {
+    console.error('Error reading Claude settings:', error);
+    return { found: false, error: error.message };
+  }
+});
+
+ipcMain.handle('get-chatgpt-settings', async () => {
+  try {
+    const homeDir = os.homedir();
+    const chatgptSettingsPath = path.join(homeDir, '.chatgpt', 'settings.json');
+
+    // Check if file exists
+    try {
+      await fs.access(chatgptSettingsPath);
+    } catch (error) {
+      // File doesn't exist
+      return { found: false };
+    }
+
+    // Read and parse the file
+    const fileContent = await fs.readFile(chatgptSettingsPath, 'utf-8');
+    const settings = JSON.parse(fileContent);
+
+    return { found: true, settings };
+  } catch (error) {
+    console.error('Error reading ChatGPT settings:', error);
+    return { found: false, error: error.message };
+  }
+});
+

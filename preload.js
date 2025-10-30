@@ -7,6 +7,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getAppPath: () => ipcRenderer.invoke('get-app-path'),
   restartApp: () => ipcRenderer.invoke('restart-app'),
   getGeminiSettings: () => ipcRenderer.invoke('get-gemini-settings'),
+  getClaudeSettings: () => ipcRenderer.invoke('get-claude-settings'),
+  getChatGPTSettings: () => ipcRenderer.invoke('get-chatgpt-settings'),
   onNewSession: (callback) => ipcRenderer.on('new-session', callback)
 });
 

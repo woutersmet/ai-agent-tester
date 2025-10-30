@@ -208,9 +208,28 @@
 
         <div class="settings-section">
           <h3 class="section-title">Gemini Settings</h3>
+          <p class="section-description"><strong>Prerequisite:</strong> Make sure you have the right Gemini command line application installed. See <a href="https://ai.google.dev/gemini-api/docs/cli" target="_blank" rel="noopener noreferrer">documentation</a>.</p>
           <p class="section-description">Configuration loaded from <code>~/.gemini/settings.json</code></p>
           <div id="geminiSettingsContent">
             <p class="loading-text">Loading Gemini CLI settings...</p>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h3 class="section-title">Claude Settings</h3>
+          <p class="section-description"><strong>Prerequisite:</strong> Make sure you have the right Claude command line application installed. See <a href="https://docs.anthropic.com/en/docs/cli" target="_blank" rel="noopener noreferrer">documentation</a>.</p>
+          <p class="section-description">Configuration loaded from <code>~/.claude.json</code></p>
+          <div id="claudeSettingsContent">
+            <p class="loading-text">Loading Claude CLI settings...</p>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h3 class="section-title">ChatGPT Settings</h3>
+          <p class="section-description"><strong>Prerequisite:</strong> Make sure you have the right ChatGPT command line application installed. See <a href="https://platform.openai.com/docs/guides/cli" target="_blank" rel="noopener noreferrer">documentation</a>.</p>
+          <p class="section-description">Configuration loaded from <code>~/.chatgpt/settings.json</code></p>
+          <div id="chatgptSettingsContent">
+            <p class="loading-text">Loading ChatGPT CLI settings...</p>
           </div>
         </div>
 
@@ -270,6 +289,19 @@
             <li>Type custom messages in the input area</li>
             <li>Check the Settings page for agent configuration options</li>
           </ul>
+        </div>
+
+        <div class="help-section">
+          <div class="help-icon">
+            <i data-lucide="info" class="help-icon-svg"></i>
+          </div>
+          <h3 class="section-title">About</h3>
+          <div class="about-info">
+            <p><strong>Version:</strong> 1.0.0</p>
+            <p><strong>Electron:</strong> <span id="electronVersion">Loading...</span></p>
+            <p><strong>Node.js:</strong> <span id="nodeVersion">Loading...</span></p>
+            <p><strong>Platform:</strong> macOS</p>
+          </div>
         </div>
       </div>
     </main>

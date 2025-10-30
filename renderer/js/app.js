@@ -1035,6 +1035,27 @@ function switchView(viewName) {
     helpView.classList.remove('hidden');
     sessionsSidebar.classList.add('hidden');
     updateStatus('Help & About');
+    loadHelpInfo();
+  }
+}
+
+// Load help information (version info for About section)
+async function loadHelpInfo() {
+  // Load version info if available
+  if (window.electronAPI) {
+    try {
+      const version = await window.electronAPI.getAppVersion();
+      const versionEl = document.getElementById('electronVersion');
+      if (versionEl) versionEl.textContent = version;
+    } catch (error) {
+      console.error('Failed to load version info:', error);
+    }
+  }
+
+  // Set Node.js version
+  const nodeVersionEl = document.getElementById('nodeVersion');
+  if (nodeVersionEl) {
+    nodeVersionEl.textContent = 'v20.x (via Electron)';
   }
 }
 
@@ -1059,6 +1080,12 @@ async function loadSettingsInfo() {
 
   // Load Gemini settings
   await loadGeminiSettings();
+
+  // Load Claude settings
+  await loadClaudeSettings();
+
+  // Load ChatGPT settings
+  await loadChatGPTSettings();
 
   // Load saved theme preference
   loadThemePreference();
@@ -1095,6 +1122,72 @@ async function loadGeminiSettings() {
   } catch (error) {
     console.error('Failed to load Gemini settings:', error);
     geminiContent.innerHTML = '<p class="loading-text">Error loading Gemini settings.</p>';
+  }
+}
+
+// Load Claude CLI settings
+async function loadClaudeSettings() {
+  const claudeContent = document.getElementById('claudeSettingsContent');
+  if (!claudeContent) return;
+
+  if (!window.electronAPI || !window.electronAPI.getClaudeSettings) {
+    claudeContent.innerHTML = '<p class="loading-text">Claude settings not available in this environment.</p>';
+    return;
+  }
+
+  try {
+    const result = await window.electronAPI.getClaudeSettings();
+
+    if (result.found) {
+      // Display the settings as formatted JSON
+      const jsonString = JSON.stringify(result.settings, null, 2);
+      claudeContent.innerHTML = `<pre class="gemini-settings-json">${escapeHtml(jsonString)}</pre>`;
+    } else {
+      // Show installation message
+      claudeContent.innerHTML = `
+        <div class="gemini-not-found">
+          <p><strong>Claude CLI not found</strong></p>
+          <p>It looks like the Claude CLI hasn't been installed yet or the settings file doesn't exist.</p>
+          <p>Settings should be located at: <code>~/.claude.json</code></p>
+        </div>
+      `;
+    }
+  } catch (error) {
+    console.error('Failed to load Claude settings:', error);
+    claudeContent.innerHTML = '<p class="loading-text">Error loading Claude settings.</p>';
+  }
+}
+
+// Load ChatGPT CLI settings
+async function loadChatGPTSettings() {
+  const chatgptContent = document.getElementById('chatgptSettingsContent');
+  if (!chatgptContent) return;
+
+  if (!window.electronAPI || !window.electronAPI.getChatGPTSettings) {
+    chatgptContent.innerHTML = '<p class="loading-text">ChatGPT settings not available in this environment.</p>';
+    return;
+  }
+
+  try {
+    const result = await window.electronAPI.getChatGPTSettings();
+
+    if (result.found) {
+      // Display the settings as formatted JSON
+      const jsonString = JSON.stringify(result.settings, null, 2);
+      chatgptContent.innerHTML = `<pre class="gemini-settings-json">${escapeHtml(jsonString)}</pre>`;
+    } else {
+      // Show installation message
+      chatgptContent.innerHTML = `
+        <div class="gemini-not-found">
+          <p><strong>ChatGPT CLI not found</strong></p>
+          <p>It looks like the ChatGPT CLI hasn't been installed yet or the settings file doesn't exist.</p>
+          <p>Settings should be located at: <code>~/.chatgpt/settings.json</code></p>
+        </div>
+      `;
+    }
+  } catch (error) {
+    console.error('Failed to load ChatGPT settings:', error);
+    chatgptContent.innerHTML = '<p class="loading-text">Error loading ChatGPT settings.</p>';
   }
 }
 

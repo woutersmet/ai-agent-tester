@@ -232,12 +232,15 @@ function updateQuickActions(commandId) {
   // Define quick actions for each command type
   const quickActionsMap = {
     'gemini': [
+      { label: 'Say Hello', command: 'Hello there' },
       { label: 'List MCP & Tools', command: 'gemini mcp list --servers' }
     ],
     'claude': [
+      { label: 'Say Hello', command: 'Hello there' },
       { label: 'List MCP & Tools', command: 'claude mcp list' }
     ],
     'chatgpt': [
+      { label: 'Say Hello', command: 'Hello there' },
       { label: 'List MCP & Tools', command: 'codex mcp list' }
     ],
     'raw-terminal': [

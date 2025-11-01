@@ -194,19 +194,22 @@
             </span>
           </h3>
 
-          <p class="section-description">Configuration loaded from <code>~/.gemini/settings.json</code> <a href="#" class="vscode-link" data-file="~/.gemini/settings.json">Open with VS Code</a></p>
+          <p class="section-description">
+            Configuration loaded from <code>~/.gemini/settings.json</code>
+            <a href="#" class="vscode-link" data-file="~/.gemini/settings.json">Open with VS Code</a>
+            <a href="#" class="raw-config-toggle" data-target="geminiRawConfig">Show raw config JSON</a>
+          </p>
+
+          <!-- Raw Config Section (hidden by default) -->
+          <div id="geminiRawConfig" class="raw-config-section" style="display: none;">
+            <div id="geminiSettingsContent">
+              <p class="loading-text">Loading Gemini CLI settings...</p>
+            </div>
+          </div>
 
           <!-- MCP Servers Section -->
           <div id="geminiMcpServers">
             <p class="loading-text">Loading MCP servers...</p>
-          </div>
-
-          <!-- Raw Config Section -->
-          <div id="geminiRawConfig" class="raw-config-section">
-            <p class="raw-config-label">Raw Config</p>
-            <div id="geminiSettingsContent">
-              <p class="loading-text">Loading Gemini CLI settings...</p>
-            </div>
           </div>
         </div>
 
@@ -220,19 +223,22 @@
             </span>
           </h3>
           <p class="section-description"><strong>Prerequisite:</strong> Make sure you have the right Claude command line application installed. See <a href="https://docs.anthropic.com/en/docs/cli" target="_blank" rel="noopener noreferrer">documentation</a>.</p>
-          <p class="section-description">Configuration loaded from <code>~/.claude.json</code> <a href="#" class="vscode-link" data-file="~/.claude.json">Open with VS Code</a></p>
+          <p class="section-description">
+            Configuration loaded from <code>~/.claude.json</code>
+            <a href="#" class="vscode-link" data-file="~/.claude.json">Open with VS Code</a>
+            <a href="#" class="raw-config-toggle" data-target="claudeRawConfig">Show raw config JSON</a>
+          </p>
+
+          <!-- Raw Config Section (hidden by default) -->
+          <div id="claudeRawConfig" class="raw-config-section" style="display: none;">
+            <div id="claudeSettingsContent">
+              <p class="loading-text">Loading Claude CLI settings...</p>
+            </div>
+          </div>
 
           <!-- MCP Servers Section -->
           <div id="claudeMcpServers">
             <p class="loading-text">Loading MCP servers...</p>
-          </div>
-
-          <!-- Raw Config Section -->
-          <div id="claudeRawConfig" class="raw-config-section">
-            <p class="raw-config-label">Raw Config</p>
-            <div id="claudeSettingsContent">
-              <p class="loading-text">Loading Claude CLI settings...</p>
-            </div>
           </div>
         </div>
 
@@ -246,19 +252,22 @@
             </span>
           </h3>
           <p class="section-description"><strong>Prerequisite:</strong> Make sure you have the right ChatGPT <strong>Codex CLI</strong> application installed. See <a href="https://developers.openai.com/codex/cli" target="_blank" rel="noopener noreferrer">documentation</a>.</p>
-          <p class="section-description">Configuration loaded from <code>~/.codex/config.toml</code> <a href="#" class="vscode-link" data-file="~/.codex/config.toml">Open with VS Code</a></p>
+          <p class="section-description">
+            Configuration loaded from <code>~/.codex/config.toml</code>
+            <a href="#" class="vscode-link" data-file="~/.codex/config.toml">Open with VS Code</a>
+            <a href="#" class="raw-config-toggle" data-target="chatgptRawConfig">Show raw config JSON</a>
+          </p>
+
+          <!-- Raw Config Section (hidden by default) -->
+          <div id="chatgptRawConfig" class="raw-config-section" style="display: none;">
+            <div id="chatgptSettingsContent">
+              <p class="loading-text">Loading ChatGPT Codex CLI settings...</p>
+            </div>
+          </div>
 
           <!-- MCP Servers Section -->
           <div id="chatgptMcpServers">
             <p class="loading-text">Loading MCP servers...</p>
-          </div>
-
-          <!-- Raw Config Section -->
-          <div id="chatgptRawConfig" class="raw-config-section">
-            <p class="raw-config-label">Raw Config</p>
-            <div id="chatgptSettingsContent">
-              <p class="loading-text">Loading ChatGPT Codex CLI settings...</p>
-            </div>
           </div>
         </div>
 

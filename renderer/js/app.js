@@ -1783,6 +1783,26 @@ function setupEventListeners() {
     });
   });
 
+  // Raw config toggles
+  const rawConfigToggles = document.querySelectorAll('.raw-config-toggle');
+  rawConfigToggles.forEach(toggle => {
+    toggle.addEventListener('click', (e) => {
+      e.preventDefault();
+      const targetId = toggle.dataset.target;
+      const targetElement = document.getElementById(targetId);
+
+      if (targetElement) {
+        if (targetElement.style.display === 'none') {
+          targetElement.style.display = 'block';
+          toggle.textContent = 'Hide raw config JSON';
+        } else {
+          targetElement.style.display = 'none';
+          toggle.textContent = 'Show raw config JSON';
+        }
+      }
+    });
+  });
+
   // Session view controls
   sendBtn.addEventListener('click', sendMessage);
   sendBtnApi.addEventListener('click', sendMessage);

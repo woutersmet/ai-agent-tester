@@ -271,19 +271,34 @@
           </div>
         </div>
 
+        </div>
+        <!-- End Agents and Tools Tab -->
+
+        <!-- Advanced Tab -->
+        <div class="settings-tab-content" id="advancedTab">
+
+        <div class="settings-section">
+          <h3 class="section-title">General</h3>
+          <div class="setting-item">
+            <label class="setting-label">
+              <span>Theme</span>
+              <select class="setting-select" id="themeSelect">
+                <option value="light" selected>Light</option>
+                <option value="dark">Dark</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
         <div class="settings-section">
           <h3 class="section-title">Example MCP Server</h3>
           <p class="section-description">
-            This app includes a sample MCP (Model Context Protocol) server called "Famous Quotes" that you can use to test MCP integration with your AI agents.
-            The server is a standalone JavaScript file with <strong>no dependencies required</strong> - it works out of the box!
-          </p>
-          <p class="section-description">
-            Start the server below and add the configuration to your agent's settings.
+            This app includes a simple local MCP server called "Famous Quotes" with some tools that you can use to test with your agents.
           </p>
 
           <div class="mcp-server-controls">
             <div class="mcp-status">
-              <span class="mcp-status-label">Status:</span>
+              <span class="mcp-status-label">MCP server status:</span>
               <span id="mcpServerStatus" class="mcp-status-text">Checking...</span>
             </div>
             <div class="mcp-buttons">
@@ -309,25 +324,6 @@
           </div>
         </div>
 
-        </div>
-        <!-- End Agents and Tools Tab -->
-
-        <!-- Advanced Tab -->
-        <div class="settings-tab-content" id="advancedTab">
-
-        <div class="settings-section">
-          <h3 class="section-title">General</h3>
-          <div class="setting-item">
-            <label class="setting-label">
-              <span>Theme</span>
-              <select class="setting-select" id="themeSelect">
-                <option value="light" selected>Light</option>
-                <option value="dark">Dark</option>
-              </select>
-            </label>
-          </div>
-        </div>
-
         <div class="settings-section">
           <h3 class="section-title">Electron API Configuration</h3>
           <div class="setting-item">
@@ -350,10 +346,10 @@
         </div>
         <!-- End Advanced Tab -->
 
-        <div class="settings-actions">
+        <!-- <div class="settings-actions">
           <button class="settings-btn primary">Save Settings</button>
           <button class="settings-btn">Reset to Defaults</button>
-        </div>
+        </div> -->
       </div>
     </main>
 

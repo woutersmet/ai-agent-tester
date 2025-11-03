@@ -95,6 +95,26 @@ The application will:
 
 ## 🎨 Using the Application
 
+### AI Agent Working Directory
+
+**Important:** When you first launch AI Agent Tester, it automatically creates a folder called **"AI Agent Tester"** in your Documents directory (`~/Documents/AI Agent Tester/`).
+
+This folder serves as the **working directory** for all AI agent interactions:
+
+- **All agent commands** (Gemini, Claude, ChatGPT, etc.) run within this folder
+- **Files created by agents** will appear in this folder
+- **Agents can read and modify** files in this directory
+
+#### What's Inside
+
+The folder contains an `instructions.txt` file that explains its purpose. You can:
+- Ask agents: *"What files do you see in the current directory?"*
+- Ask agents: *"Can you read the instructions.txt file?"*
+- Ask agents: *"Create a new file called test.txt with some content"*
+- Ask agents: *"List all files in this folder"*
+
+This makes it easy to work with agents on file-based tasks without worrying about where files are being created!
+
 ### Viewing Sessions
 
 1. Launch the app with `npm start`

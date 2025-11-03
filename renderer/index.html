@@ -386,6 +386,34 @@
 
         <div class="help-section">
           <div class="help-icon">
+            <i data-lucide="folder" class="help-icon-svg"></i>
+          </div>
+          <h3 class="section-title">AI Agent Working Directory</h3>
+          <p class="help-text">
+            <strong>Important:</strong> AI Agent Tester automatically creates a folder called <strong>"AI Agent Tester"</strong>
+            in your Documents directory (<code>~/Documents/AI Agent Tester/</code>) when you first launch the app.
+          </p>
+          <p class="help-text">
+            This folder serves as the <strong>working directory</strong> for all AI agent interactions:
+          </p>
+          <ul class="help-list">
+            <li><strong>All agent commands</strong> (Gemini, Claude, ChatGPT, etc.) run within this folder</li>
+            <li><strong>Files created by agents</strong> will appear in this folder</li>
+            <li><strong>Agents can read and modify</strong> files in this directory</li>
+          </ul>
+          <p class="help-text">
+            The folder contains an <code>instructions.txt</code> file explaining its purpose. Try asking agents:
+          </p>
+          <ul class="help-list">
+            <li>"What files do you see in the current directory?"</li>
+            <li>"Can you read the instructions.txt file?"</li>
+            <li>"Create a new file called test.txt with some content"</li>
+            <li>"List all files in this folder"</li>
+          </ul>
+        </div>
+
+        <div class="help-section">
+          <div class="help-icon">
             <i data-lucide="lightbulb" class="help-icon-svg"></i>
           </div>
           <h3 class="section-title">Getting Started</h3>

@@ -23,6 +23,19 @@ function getSpawnEnv() {
   };
 }
 
+// Helper function to get spawn options with working directory for agent commands
+function getSpawnOptions(isAgent = false) {
+  const options = { env: getSpawnEnv() };
+
+  // Set working directory for agent commands
+  if (isAgent && process.env.AGENT_WORKING_DIR) {
+    options.cwd = process.env.AGENT_WORKING_DIR;
+    console.log(`🗂️  Setting working directory for agent: ${options.cwd}`);
+  }
+
+  return options;
+}
+
 // Track if session storage has been initialized
 let sessionStorageInitialized = false;
 
@@ -136,7 +149,7 @@ app.post('/api/execute', (req, res) => {
 
     console.log(`Executing API request: curl ${curlArgs.join(' ')}`);
 
-    const childProcess = spawn('curl', curlArgs, { env: getSpawnEnv() });
+    const childProcess = spawn('curl', curlArgs, getSpawnOptions(false));
     let stdout = '';
     let stderr = '';
     let responseSent = false;
@@ -209,7 +222,7 @@ app.post('/api/execute', (req, res) => {
 
   console.log(`Executing: ${cmd} ${finalArgs.join(' ')}`);
 
-  const childProcess = spawn(cmd, finalArgs, { env: getSpawnEnv() });
+  const childProcess = spawn(cmd, finalArgs, getSpawnOptions(isAgent));
   let stdout = '';
   let stderr = '';
   let responseSent = false;
@@ -302,11 +315,19 @@ app.post('/api/execute-custom', (req, res) => {
   console.log(`Executing custom command: ${command}`);
   console.warn('⚠️  WARNING: Executing custom command without validation!');
 
-  const childProcess = exec(command, {
+  const execOptions = {
     timeout: 30000,
     env: getSpawnEnv(),
     shell: process.platform === 'darwin' ? '/bin/zsh' : true
-  }, (error, stdout, stderr) => {
+  };
+
+  // Set working directory to AI Agent Tester folder if available
+  if (process.env.AGENT_WORKING_DIR) {
+    execOptions.cwd = process.env.AGENT_WORKING_DIR;
+    console.log(`🗂️  Setting working directory: ${execOptions.cwd}`);
+  }
+
+  const childProcess = exec(command, execOptions, (error, stdout, stderr) => {
     // Remove from running processes
     if (processId) {
       runningProcesses.delete(processId);

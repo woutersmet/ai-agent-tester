@@ -1,0 +1,32 @@
+
+> ai-agent-tester-app-mac@1.0.0 start
+> electron .
+
+🚀 Starting AI Agent Tester (Dev) in DEVELOPMENT mode
+📁 User data path: /Users/wouter.smet/Library/Application Support/AI Agent Tester (Dev)
+📁 AI Agent Tester working directory: /Users/wouter.smet/Documents/AI Agent Tester
+🔍 Using port 3001
+✅ Express server running on http://localhost:3001
+🗄️  Initializing session storage...
+✅ ai-agent-runner-sessions-history folder already exists
+✅ Session storage initialized
+🔍 Checking server health...
+✅ Server is ready
+📄 Creating new file 2025-11-03.json
+➕ Adding new session 1004 to 2025-11-03.json
+✅ Saved session 1004 to 2025-11-03.json (file now has 1 sessions)
+Executing: ls -la
+Executing custom command: pwd
+⚠️  WARNING: Executing custom command without validation!
+🗂️  Setting working directory: /Users/wouter.smet/Documents/AI Agent Tester
+Executing custom command: echo "Hello from AI Agent" > test-file.txt && cat test-file.txt
+⚠️  WARNING: Executing custom command without validation!
+🗂️  Setting working directory: /Users/wouter.smet/Documents/AI Agent Tester
+🔍 Searching for session 1004 in 7 files
+✅ Added message to session 1004 in 2025-11-03.json (now has 1 messages)
+📖 Read 1 existing sessions from 2025-11-03.json
+🔄 Updating existing session 1004 in 2025-11-03.json
+✅ Saved session 1004 to 2025-11-03.json (file now has 1 sessions)
+Executing: gemini -p ✖ Safe-chain: Error while scanning.
+Failed to check for malicious packages: Dry-run command failed with exit code 1 and output:
+🗂️  Setting working directory for agent: /Users/wouter.smet/Documents/AI Agent Tester

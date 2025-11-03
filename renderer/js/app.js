@@ -95,8 +95,12 @@ async function init() {
     });
   }
 
-  // Automatically create a new session on startup
-  createNewSession();
+  // Restore last view and session, or create new session
+  const restored = await restoreLastState();
+  if (!restored) {
+    // Automatically create a new session on startup if nothing was restored
+    createNewSession();
+  }
 
   updateStatus('Ready');
 }
@@ -361,6 +365,9 @@ async function selectSession(sessionId) {
 
   // Load session details
   await loadSessionDetails(sessionId);
+
+  // Save current state
+  saveCurrentState('sessions', sessionId);
 }
 
 // Load session details
@@ -1080,6 +1087,49 @@ function switchView(viewName) {
     updateStatus('Help & About');
     loadHelpInfo();
   }
+
+  // Save current view to localStorage
+  saveCurrentState(viewName, currentSessionId);
+}
+
+// Save current state to localStorage
+function saveCurrentState(viewName, sessionId) {
+  try {
+    localStorage.setItem('lastView', viewName);
+    if (sessionId) {
+      localStorage.setItem('lastSessionId', sessionId.toString());
+    }
+  } catch (error) {
+    console.error('Failed to save state:', error);
+  }
+}
+
+// Restore last state from localStorage
+async function restoreLastState() {
+  try {
+    const lastView = localStorage.getItem('lastView');
+    const lastSessionId = localStorage.getItem('lastSessionId');
+
+    if (lastView && lastView !== 'sessions') {
+      // Restore settings or help view
+      switchView(lastView);
+      return true;
+    } else if (lastSessionId && sessions.length > 0) {
+      // Restore last session
+      const sessionId = parseInt(lastSessionId);
+      const sessionExists = sessions.find(s => s.id === sessionId);
+
+      if (sessionExists) {
+        await selectSession(sessionId);
+        return true;
+      }
+    }
+
+    return false;
+  } catch (error) {
+    console.error('Failed to restore state:', error);
+    return false;
+  }
 }
 
 // Load help information (version info for About section)
@@ -1403,7 +1453,6 @@ function renderMcpServers(settings, container, agentType) {
 
   // Build HTML for MCP servers in card format
   let html = '<div class="mcp-servers-container">';
-  html += '<h4 class="mcp-servers-title">MCP Servers</h4>';
 
   let serverIndex = 0;
   for (const [serverName, serverConfig] of Object.entries(mcpServers)) {
